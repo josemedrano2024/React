@@ -3,79 +3,64 @@
   <head>
     <meta charset="UTF-8" />
     <title>Ubicate</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <!-- Bootstrap CSS -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
       rel="stylesheet"
-      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
-      crossorigin="anonymous"
     />
-    <script
-      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
-      integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
-      crossorigin="anonymous"
-    ></script>
-
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
-      integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
-      crossorigin="anonymous"
-    ></script>
+    <!-- Bootstrap Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+    />
     <link rel="stylesheet" href="src/mapa.css" />
   </head>
   <body>
+    <!-- Navbar optimizado para móviles -->
     <nav class="navbar navbar-expand-lg navbar-light navbar-custom">
       <div class="container-fluid">
-        <!-- Logo a la izquierda -->
+        <!-- Logo -->
         <a class="navbar-brand" href="#">
-          <img
-            src="src/assets/Logo.jpeg"
-            alt="Logo"
-            class="logo-img"
-          />
+          <img src="src/assets/Logo.jpeg" alt="Logo" class="logo-img" />
         </a>
 
-        <!-- Botón para menú en móviles -->
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarContent"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
+        <!-- Título centrado -->
+        <div class="navbar-title">Bienvenido</div>
 
-          <h2>Bienvenido</h2>
-          <!-- Botón con imagen a la derecha -->
-          <div class="d-flex">
-            <button class="btn-with-img">
-              <span>Mi Cuenta</span>
-              <img
-                src="src/assets/usuario.png"
-                alt="Usuario"
-                class="btn-img"
-              />
-            </button>
-          </div>
-        </div>
+        <!-- Botón de cuenta -->
+        <button class="btn-with-img">
+          <span class="d-none d-sm-inline"></span>
+          <img src="src/assets/usuario.png" alt="Usuario" class="btn-img" />
+        </button>
       </div>
     </nav>
 
-    <input
-      class="input-direccion"
-      type="text"
-      id="direccion"
-      placeholder="¿Que estas buscando hoy?"
-    />
-    <button onclick="buscarDireccion()">Buscar</button>
+    <!-- Barra de búsqueda -->
+    <div class="search-container">
+      <input
+        type="text"
+        id="direccion"
+        class="input-direccion"
+        placeholder="¿Qué buscas hoy?"
+      />
+      <button onclick="buscarDireccion()" class="search-btn">Buscar</button>
+    </div>
 
-    <div class="mapa" id="map"></div>
+    <!-- Mapa -->
+    <div id="map" class="mapa"></div>
 
+    <!-- Scripts -->
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
+      // Inicializar mapa
       const map = L.map("map").setView([13.4846, -88.1834], 13);
 
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -85,26 +70,56 @@
 
       let marcador;
 
+      // Obtener ubicación actual
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           (pos) => {
             const lat = pos.coords.latitude;
             const lon = pos.coords.longitude;
             map.setView([lat, lon], 15);
-            marcador = L.marker([lat, lon])
+
+            // Icono personalizado
+            const iconoPersona = L.icon({
+              iconUrl: "src/assets/usuario.png",
+              iconSize: [32, 32],
+              iconAnchor: [16, 32],
+              popupAnchor: [0, -32],
+            });
+
+            marcador = L.marker([lat, lon], { icon: iconoPersona })
               .addTo(map)
               .bindPopup("📍 Estás aquí")
               .openPopup();
           },
           (err) => {
             console.warn("No se pudo obtener ubicación:", err.message);
+            // Marcador por defecto si no se obtiene ubicación
+            marcador = L.marker([13.4846, -88.1834])
+              .addTo(map)
+              .bindPopup("📍 Ubicación por defecto")
+              .openPopup();
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 5000,
+            maximumAge: 0,
           }
         );
       }
 
+      // Buscar dirección
       function buscarDireccion() {
-        const input = document.getElementById("direccion").value;
-        if (!input) return alert("Escribe una dirección primero.");
+        const input = document.getElementById("direccion").value.trim();
+        if (!input) {
+          alert("Por favor, escribe una dirección para buscar.");
+          return;
+        }
+
+        // Mostrar indicador de carga
+        const btnBuscar = document.querySelector(".search-btn");
+        btnBuscar.innerHTML =
+          '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Buscando...';
+        btnBuscar.disabled = true;
 
         fetch(
           `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
@@ -114,17 +129,18 @@
           .then((res) => res.json())
           .then((data) => {
             if (data.length === 0) {
-              alert("No se encontró la dirección.");
+              alert("No se encontraron resultados para tu búsqueda.");
               return;
             }
 
             const lugar = data[0];
-            const lat = lugar.lat;
-            const lon = lugar.lon;
+            const lat = parseFloat(lugar.lat);
+            const lon = parseFloat(lugar.lon);
 
             map.setView([lat, lon], 15);
 
-            if (marcador) marcador.remove();
+            if (marcador) map.removeLayer(marcador);
+
             marcador = L.marker([lat, lon])
               .addTo(map)
               .bindPopup(`📍 ${lugar.display_name}`)
@@ -132,8 +148,24 @@
           })
           .catch((err) => {
             console.error("Error al buscar dirección:", err);
+            alert(
+              "Ocurrió un error al buscar la dirección. Intenta nuevamente."
+            );
+          })
+          .finally(() => {
+            btnBuscar.innerHTML = "Buscar";
+            btnBuscar.disabled = false;
           });
       }
+
+      // Manejar el botón de búsqueda al presionar Enter
+      document
+        .getElementById("direccion")
+        .addEventListener("keypress", function (e) {
+          if (e.key === "Enter") {
+            buscarDireccion();
+          }
+        });
     </script>
   </body>
 </html>
