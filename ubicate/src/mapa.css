@@ -1,0 +1,73 @@
+#map {
+  height: 500px;
+}
+body {
+  font-family: sans-serif;
+  padding: 1em;
+  background-color: #0dc2f7;
+}
+input {
+  padding: 5px;
+  width: 300px;
+}
+button {
+  padding: 5px 10px;
+}
+
+.mapa {
+  position: relative;
+  width: 100%;
+  margin-top: 25px;
+  height: 90%;
+}
+
+.bienvenida {
+  text-align: center;
+  top: 10px;
+  left: 10px;
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.input-direccion {
+  position: center;
+  top: 10px;
+  left: 10px;
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 10px;
+  border-radius: 5px;
+  margin-left: 380px;
+  margin-top: 10px;
+}
+
+/* Estilos personalizados */
+.navbar-custom {
+  background-color: #ffffff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.logo-img {
+  height: 40px; /* Ajusta según el tamaño de tu logo */
+}
+
+.btn-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-left: 10px;
+}
+
+.btn-with-img {
+  display: flex;
+  align-items: center;
+  border: none;
+  background: none;
+  padding: 5px 10px;
+}
+
+.btn-with-img:hover {
+  background-color: #f8f9fa;
+  border-radius: 20px;
+}
