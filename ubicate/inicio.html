@@ -55,6 +55,60 @@
     <!-- Mapa -->
     <div id="map" class="mapa"></div>
 
+    <div class="lugares-container" id="lugares">
+      <div class="lugar-item">
+        <img
+          src="src/assets/restaurante.png"
+          alt="Restaurante"
+          class="lugar-imagen"
+        />
+        <div class="lugar-info">
+          <div class="lugar-nombre">Restaurante La Casona</div>
+          <div class="lugar-direccion">Calle Principal #123, Centro</div>
+          <div class="lugar-distancia">A 450 metros de tu ubicación</div>
+        </div>
+      </div>
+
+      <div class="lugar-item">
+        <img
+          src="src/assets/cafeteria.png"
+          alt="Cafetería"
+          class="lugar-imagen"
+        />
+        <div class="lugar-info">
+          <div class="lugar-nombre">Cafetería Aroma</div>
+          <div class="lugar-direccion">Avenida Central #456</div>
+          <div class="lugar-distancia">A 1.2 km de tu ubicación</div>
+        </div>
+      </div>
+
+      <div class="lugar-item">
+        <img
+          src="src/assets/parque-natural.png"
+          alt="Parque"
+          class="lugar-imagen"
+        />
+        <div class="lugar-info">
+          <div class="lugar-nombre">Parque Central</div>
+          <div class="lugar-direccion">Zona Recreativa Norte</div>
+          <div class="lugar-distancia">A 800 metros de tu ubicación</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botones flotantes -->
+    <div class="botones-flotantes">
+      <button class="boton-accion" id="btnFavoritos" title="Favoritos">
+        <i class="bi bi-star"></i>
+      </button>
+      <button class="boton-accion" id="btnInicio" title="Mi ubicación">
+        <i class="bi bi-house"></i>
+      </button>
+      <button class="boton-accion" id="btnMapa" title="Mapa">
+        <i class="bi bi-map"></i>
+      </button>
+    </div>
+
     <!-- Scripts -->
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
@@ -166,6 +220,48 @@
             buscarDireccion();
           }
         });
+
+      document
+        .getElementById("btnFavoritos")
+        .addEventListener("click", function () {
+          alert("Mostrando lugares favoritos");
+          // Aquí iría la lógica para filtrar lugares favoritos
+        });
+
+      document
+        .getElementById("btnInicio")
+        .addEventListener("click", function () {
+          alert("Centrando mapa en tu ubicación");
+          // Centrar mapa en ubicación actual
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+              (pos) => {
+                const lat = pos.coords.latitude;
+                const lon = pos.coords.longitude;
+                map.setView([lat, lon], 15);
+              },
+              (err) => {
+                console.error("Error al obtener ubicación:", err);
+              }
+            );
+          }
+        });
+
+      document.getElementById("btnMapa").addEventListener("click", function () {
+        alert("Alternando vista del mapa");
+        // Aquí iría la lógica para cambiar tipo de mapa
+      });
+
+      // Ejemplo de cómo marcar botón activo
+      function setActiveButton(btnId) {
+        document.querySelectorAll(".boton-accion").forEach((btn) => {
+          btn.classList.remove("activo");
+        });
+        document.getElementById(btnId).classList.add("activo");
+      }
+
+      // Inicialmente activar el botón de mapa
+      setActiveButton("btnMapa");
     </script>
   </body>
 </html>

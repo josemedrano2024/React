@@ -109,3 +109,106 @@ body {
     padding: 8px 12px;
   }
 }
+
+.lugares-container {
+  width: 100%;
+  background: white;
+  border-top: 1px solid #eee;
+  padding: 15px;
+  max-height: 40vh;
+  overflow-y: auto;
+}
+
+.lugar-item {
+  display: flex;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.lugar-imagen {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  object-fit: cover;
+  margin-right: 15px;
+}
+
+.lugar-info {
+  flex: 1;
+}
+
+.lugar-nombre {
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.lugar-direccion {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.lugar-distancia {
+  font-size: 0.8rem;
+  color: #4a6bff;
+  font-weight: 500;
+}
+
+/* Barra de botones flotante */
+.botones-flotantes {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  background: white;
+  padding: 10px;
+  border-radius: 30px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.boton-accion {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f5;
+  margin: 0 5px;
+  border: none;
+  color: #333;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.boton-accion.activo {
+  background: #4a6bff;
+  color: white;
+}
+
+.boton-accion:hover {
+  transform: translateY(-3px);
+}
+
+/* Adaptación para móviles */
+@media (max-width: 576px) {
+  .lugar-imagen {
+    width: 70px;
+    height: 70px;
+  }
+
+  .botones-flotantes {
+    bottom: 10px;
+  }
+
+  .boton-accion {
+    width: 45px;
+    height: 45px;
+    font-size: 1.1rem;
+  }
+}
