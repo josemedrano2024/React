@@ -11,6 +11,17 @@ const firebaseConfig = {
   appId: "1:1049935204935:web:5397f73293ca15f3bad762",
 };
 
+export const guardarNegocio = async (datosNegocio) => {
+  try {
+    await setDoc(doc(db, "ubicate", "Negocios"), datosNegocio);
+    console.log("Negocio registrado en Firestore!");
+    return true;
+  } catch (error) {
+    console.error("Error al guardar:", error);
+    return false;
+  }
+};
+
 // Inicializa la app de Firebase
 const app = initializeApp(firebaseConfig);
 
