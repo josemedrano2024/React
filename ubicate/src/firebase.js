@@ -1,6 +1,7 @@
 // src/firebase.js
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBm6n7ZqAPl_QaYSVE8nsJ9fKMUCGIgsfs",
@@ -21,6 +22,8 @@ export const guardarNegocio = async (datosNegocio) => {
     return false;
   }
 };
+
+export const auth = getAuth(app);
 
 // Inicializa la app de Firebase
 const app = initializeApp(firebaseConfig);
