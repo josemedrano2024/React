@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <title>Registro - Ubícate</title>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <link rel="stylesheet" href="src/registro.css" />
+  </head>
+  <body>
+     <center>
+      <form id="registerForm">
+        <h2>Registrarse</h2>
+    <div  class="register-container">
+        <div class="registro-box">
+          <img src="src/assets/Logo.jpeg" alt="Logo" class="registro-logo" />
+          <div class="input-group">
+            <input
+              type="email"
+              id="email"
+              placeholder="Correo electrónico"
+              required
+            /><br />
+          </div>
+
+          <div class="input-group">
+            <input
+              type="password"
+              id="password"
+              placeholder="Contraseña"
+              required
+            /><br />
+          </div>
+
+          <button type="submit">Registrarse</button>
+        </div>
+      </form> </center>
+    </div>
+
+    <script type="module">
+      // Importar Firebase desde CDN
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+      import {
+        getAuth,
+        createUserWithEmailAndPassword,
+      } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+      import {
+        getFirestore,
+        doc,
+        setDoc,
+        serverTimestamp,
+      } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyBm6n7ZqAPl_QaYSVE8nsJ9fKMUCGIgsfs",
+        authDomain: "ubicate-d4856.firebaseapp.com",
+        projectId: "ubicate-d4856",
+        storageBucket: "ubicate-d4856.firebasestorage.app",
+        messagingSenderId: "1049935204935",
+        appId: "1:1049935204935:web:5397f73293ca15f3bad762",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+
+      document
+        .getElementById("registerForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const email = document.getElementById("email").value;
+          const password = document.getElementById("password").value;
+
+          try {
+            const userCredential = await createUserWithEmailAndPassword(
+              auth,
+              email,
+              password
+            );
+            const user = userCredential.user;
+
+            // Guardar en Firestore
+            await setDoc(doc(db, "users", user.uid), {
+              uid: user.uid,
+              email: user.email,
+              fechaRegistro: serverTimestamp(),
+            });
+
+            window.location.href = "index.html";
+
+            alert("¡Registro exitoso!");
+          } catch (error) {
+            alert("Error: " + error.message);
+          }
+        });
+    </script>
+  </body>
+</html>

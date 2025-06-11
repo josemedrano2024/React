@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Login - Ubícate</title>
+  </head>
+  <body>
+    <h2>Iniciar Sesión</h2>
+    <form id="loginForm">
+      <input
+        type="email"
+        id="email"
+        placeholder="Correo electrónico"
+        required
+      /><br />
+      <input
+        type="password"
+        id="password"
+        placeholder="Contraseña"
+        required
+      /><br />
+      <button type="submit">Iniciar sesión</button>
+    </form>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+      import {
+        getAuth,
+        signInWithEmailAndPassword,
+      } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyBm6n7ZqAPl_QaYSVE8nsJ9fKMUCGIgsfs",
+        authDomain: "ubicate-d4856.firebaseapp.com",
+        projectId: "ubicate-d4856",
+        storageBucket: "ubicate-d4856.firebasestorage.app",
+        messagingSenderId: "1049935204935",
+        appId: "1:1049935204935:web:5397f73293ca15f3bad762",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+
+      document
+        .getElementById("loginForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const email = document.getElementById("email").value;
+          const password = document.getElementById("password").value;
+
+          try {
+            await signInWithEmailAndPassword(auth, email, password);
+            alert("¡Sesión iniciada!");
+            // Puedes redirigir a otra página aquí
+            // window.location.href = "/dashboard.html";
+          } catch (error) {
+            alert("Error: " + error.message);
+          }
+        });
+    </script>
+  </body>
+</html>

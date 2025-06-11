@@ -1,7 +1,8 @@
-import { auth } from "./firebase.js";
+import React, { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "./firebase.js";
 
-const Login = () => {
+function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -9,9 +10,9 @@ const Login = () => {
     e.preventDefault();
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      alert("¡Bienvenido!");
+      alert("Sesión iniciada");
     } catch (error) {
-      alert(`Error: ${error.message}`);
+      alert("Error: " + error.message);
     }
   };
 
@@ -19,21 +20,17 @@ const Login = () => {
     <form onSubmit={handleLogin}>
       <input
         type="email"
-        placeholder="Correo electrónico"
-        value={email}
+        placeholder="Correo"
         onChange={(e) => setEmail(e.target.value)}
-        required
       />
       <input
         type="password"
         placeholder="Contraseña"
-        value={password}
         onChange={(e) => setPassword(e.target.value)}
-        required
       />
-      <button type="submit">Iniciar Sesión</button>
+      <button type="submit">Iniciar sesión</button>
     </form>
   );
-};
+}
 
 export default Login;

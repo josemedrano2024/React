@@ -13,7 +13,7 @@
     <!-- Pantalla de carga -->
     <div class="pantalla-carga">
       <img src="src/assets/Logo.jpeg" alt="Logo" class="logo-carga" />
-      <p class="eslogan">!Lo que buscas cerca de ti¡</p>
+      <p class="eslogan">¡Lo que buscas cerca de ti!</p>
       <div class="cargador"></div>
     </div>
 
@@ -25,11 +25,11 @@
 
         <form id="loginForm">
           <div class="input-group">
-            <label for="user">Usuario</label>
+            <label for="user">Correo Electrónico</label>
             <input
-              type="text"
+              type="email"
               id="user"
-              placeholder="ingrese su usuario"
+              placeholder="Ingresa tu correo"
               required
             />
           </div>
@@ -43,12 +43,6 @@
               required
             />
           </div>
-          <h2>o</h2>
-          <h3>Iniciar sesion con:</h3>
-
-          <img src="src/assets/facebook.png" alt="facebook" />
-          <img src="src/assets/google.png" alt="google" />
-          <img src="src/assets/instagram.png" alt="instagram" />
 
           <button type="button" class="login-btn" onclick="irAInicio()">
             Iniciar Sesión
@@ -56,11 +50,10 @@
         </form>
 
         <p class="login-footer">
-          ¿No tienes cuenta? <a href="#">Regístrate aquí</a>
+          ¿No tienes cuenta? <a href="registro.html">Regístrate aquí</a>
         </p>
       </div>
     </div>
-
     <script>
       // Simular carga y mostrar formulario después de 3 segundos
       setTimeout(function () {
@@ -84,6 +77,45 @@
           e.preventDefault();
           // Aquí iría la lógica de autenticación
           alert("Inicio de sesión exitoso (simulado)");
+        });
+    </script>
+    <!-- Agrega esto justo antes del cierre de </body> -->
+    <script type="module">
+      // Importar desde Firebase CDN
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+      import {
+        getAuth,
+        signInWithEmailAndPassword,
+      } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyBm6n7ZqAPl_QaYSVE8nsJ9fKMUCGIgsfs",
+        authDomain: "ubicate-d4856.firebaseapp.com",
+        projectId: "ubicate-d4856",
+        storageBucket: "ubicate-d4856.firebasestorage.app",
+        messagingSenderId: "1049935204935",
+        appId: "1:1049935204935:web:5397f73293ca15f3bad762",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+
+      // Manejar formulario de login
+      document
+        .getElementById("loginForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const email = document.getElementById("user").value;
+          const password = document.getElementById("password").value;
+
+          try {
+            await signInWithEmailAndPassword(auth, email, password);
+            alert("Inicio de sesión exitoso");
+            window.location.href = "principal.html"; // Redirige después del login
+          } catch (error) {
+            alert("Error al iniciar sesión: " + error.message);
+          }
         });
     </script>
   </body>
