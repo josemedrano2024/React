@@ -28,3 +28,13 @@ onSnapshot(q, (snapshot) => {
         `;
   });
 });
+
+document.getElementById("searchButton").addEventListener("click", () => {
+  const searchTerm = document.getElementById("searchInput").value.toLowerCase();
+  const cards = document.querySelectorAll(".business-card");
+
+  cards.forEach((card) => {
+    const text = card.textContent.toLowerCase();
+    card.style.display = text.includes(searchTerm) ? "block" : "none";
+  });
+});
