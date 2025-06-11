@@ -29,4 +29,6 @@ document
       console.error("❌ Error al guardar:", error);
       alert("Hubo un error al registrar el negocio");
     }
+
+    window.location.href = "principal.html";
   });
