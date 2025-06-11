@@ -1,6 +1,6 @@
-// Importa la configuración de Firebase
+// src/save-business.js
 import { db } from "./firebase.js";
-import { doc, setDoc } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 document
   .getElementById("businessForm")
@@ -15,11 +15,14 @@ document
       horario: document.getElementById("horario").value || "No especificado",
       descripcion:
         document.getElementById("descripcion").value || "Sin descripción",
-      fechaRegistro: new Date().toISOString(),
+      fechaRegistro: serverTimestamp(),
     };
 
     try {
-      await setDoc(doc(db, "ubicate", "Negocios"), businessData);
+      await addDoc(
+        collection(db, "ubicate", "Negocios", "registros"),
+        businessData
+      );
       alert("✅ Negocio registrado correctamente");
       document.getElementById("businessForm").reset();
     } catch (error) {

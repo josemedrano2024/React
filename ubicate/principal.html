@@ -33,12 +33,15 @@
         <!-- Título centrado -->
         <div class="navbar-title">Bienvenido</div>
 
-        <a href="formularionegocio.html">Registrar nuevo negocio</a>
-
         <!-- Botón de cuenta -->
         <button class="btn-with-img">
           <span class="d-none d-sm-inline"></span>
-          <img src="src/assets/usuario.png" alt="Usuario" class="btn-img" />
+          <img
+            href="formularionegocio.html"
+            src="src/assets/usuario.png"
+            alt="Usuario"
+            class="btn-img"
+          />
         </button>
       </div>
     </nav>
@@ -54,48 +57,16 @@
       <button onclick="buscarDireccion()" class="search-btn">Buscar</button>
     </div>
 
-    <!-- Mapa -->
-    <div id="map" class="mapa"></div>
+       
+    
+    <div class="container">
+        <div id="map" class="mapa"></div>
 
-    <div class="lugares-container" id="lugares">
-      <div class="lugar-item">
-        <img
-          src="src/assets/restaurante.png"
-          alt="Restaurante"
-          class="lugar-imagen"
-        />
-        <div class="lugar-info">
-          <div class="lugar-nombre">Restaurante La Casona</div>
-          <div class="lugar-direccion">Calle Principal #123, Centro</div>
-          <div class="lugar-distancia">A 450 metros de tu ubicación</div>
-        </div>
-      </div>
-
-      <div class="lugar-item">
-        <img
-          src="src/assets/cafeteria.png"
-          alt="Cafetería"
-          class="lugar-imagen"
-        />
-        <div class="lugar-info">
-          <div class="lugar-nombre">Cafetería Aroma</div>
-          <div class="lugar-direccion">Avenida Central #456</div>
-          <div class="lugar-distancia">A 1.2 km de tu ubicación</div>
-        </div>
-      </div>
-
-      <div class="lugar-item">
-        <img
-          src="src/assets/parque-natural.png"
-          alt="Parque"
-          class="lugar-imagen"
-        />
-        <div class="lugar-info">
-          <div class="lugar-nombre">Parque Central</div>
-          <div class="lugar-direccion">Zona Recreativa Norte</div>
-          <div class="lugar-distancia">A 800 metros de tu ubicación</div>
-        </div>
-      </div>
+        <h1>Negocios Cercanos</h1>
+    <a href="formularionegocio.html">➕ Registrar nuevo negocio</a>
+        <!-- Lista de negocios -->
+        <div id="business-list"></div>
+    </div>
     </div>
 
     <!-- Botones flotantes -->
@@ -265,5 +236,56 @@
       // Inicialmente activar el botón de mapa
       setActiveButton("btnMapa");
     </script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <script type="module" src="/src/list-business.js"></script>
+
+    <style>
+         /* Reset básico */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Contenedor principal (columna flexible) */
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Mapa (altura fija en móviles, flexible en desktop) */
+        #map {
+            height: 50vh; /* Altura inicial para móviles */
+            width: 100%;
+            background: #f0f0f0; /* Color temporal */
+        }
+
+        /* Lista de negocios (con scroll) */
+        #business-list {
+            flex: 1;
+            overflow-y: auto; /* Barra de desplazamiento vertical */
+            padding: 10px;
+            background: #fff;
+        }
+
+        /* Estilo de cada tarjeta */
+        .business-card {
+            margin-bottom: 10px;
+            padding: 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+
+        /* Media query para pantallas más grandes */
+        @media (min-width: 768px) {
+            #map {
+                height: 60vh; /* Ajusta altura en desktop */
+            }
+        }
+    </style>
   </body>
 </html>
