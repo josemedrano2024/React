@@ -23,10 +23,9 @@ export const guardarNegocio = async (datosNegocio) => {
   }
 };
 
-export const auth = getAuth(app);
-
-// Inicializa la app de Firebase
 const app = initializeApp(firebaseConfig);
+
+export const auth = getAuth(app);
 
 // Inicializa Firestore
 const db = getFirestore(app);
