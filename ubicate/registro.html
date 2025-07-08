@@ -8,39 +8,80 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
     <link rel="stylesheet" href="src/registro.css" />
+    <style>
+      /* Estilos básicos para que funcione mientras */
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f5f5f5;
+        margin: 0;
+        padding: 20px;
+      }
+      .register-container {
+        max-width: 400px;
+        margin: 0 auto;
+        background: #4285f4;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      .registro-logo {
+        width: 100px;
+        margin-bottom: 20px;
+      }
+      .input-group {
+        margin-bottom: 15px;
+      }
+      input {
+        width: 100%;
+        padding: 10px;
+        margin: 5px 0;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+      button {
+        width: 100%;
+        padding: 10px;
+        background-color: #4285f4;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #3367d6;
+      }
+    </style>
   </head>
   <body>
-     <center>
+    <center>
       <form id="registerForm">
         <h2>Registrarse</h2>
-    <div  class="register-container">
-        <div class="registro-box">
-          <img src="src/assets/Logo.jpeg" alt="Logo" class="registro-logo" />
-          <div class="input-group">
-            <input
-              type="email"
-              id="email"
-              placeholder="Correo electrónico"
-              required
-            /><br />
+        <div class="register-container">
+          <div class="registro-box">
+            <img src="src/assets/Logo.jpeg" alt="Logo" class="registro-logo" />
+            <div class="input-group">
+              <input
+                type="email"
+                id="email"
+                placeholder="Correo electrónico"
+                required
+              /><br />
+            </div>
+            <div class="input-group">
+              <input
+                type="password"
+                id="password"
+                placeholder="Contraseña"
+                required
+              /><br />
+            </div>
+            <button type="submit" id="submitBtn">Registrarse</button>
           </div>
-
-          <div class="input-group">
-            <input
-              type="password"
-              id="password"
-              placeholder="Contraseña"
-              required
-            /><br />
-          </div>
-
-          <button type="submit">Registrarse</button>
         </div>
-      </form> </center>
-    </div>
+      </form>
+    </center>
 
     <script type="module">
-      // Importar Firebase desde CDN
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
       import {
         getAuth,
@@ -70,10 +111,18 @@
         .getElementById("registerForm")
         .addEventListener("submit", async (e) => {
           e.preventDefault();
-          const email = document.getElementById("email").value;
-          const password = document.getElementById("password").value;
+          const submitBtn = document.getElementById("submitBtn");
+          const originalText = submitBtn.innerHTML;
 
           try {
+            // Mostrar estado de carga
+            submitBtn.innerHTML =
+              '<span class="spinner-border spinner-border-sm"></span> Registrando...';
+            submitBtn.disabled = true;
+
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+
             const userCredential = await createUserWithEmailAndPassword(
               auth,
               email,
@@ -88,11 +137,14 @@
               fechaRegistro: serverTimestamp(),
             });
 
+            // Redirigir primero, luego mostrar alerta
             window.location.href = "index.html";
-
-            alert("¡Registro exitoso!");
           } catch (error) {
+            console.error("Error:", error);
             alert("Error: " + error.message);
+          } finally {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
           }
         });
     </script>

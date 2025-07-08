@@ -4,87 +4,326 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Registro de Negocio</title>
+    <!-- Leaflet CSS -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <!-- Bootstrap para estilos -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Bootstrap Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+    />
     <style>
       body {
-        font-family: Arial, sans-serif;
-        max-width: 600px;
-        margin: 20px auto;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f8f9fa;
         padding: 20px;
       }
-      .form-group {
-        margin-bottom: 15px;
-      }
-      label {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: bold;
-      }
-      input,
-      select,
-      textarea {
-        width: 100%;
-        padding: 8px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-      }
-      button {
+      .form-container {
+        max-width: 800px;
+        margin: 0 auto;
         background: #4285f4;
-        color: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      }
+      #map {
+        height: 350px;
+        width: 100%;
+        margin: 15px 0;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+      }
+      .coordinates {
+        font-size: 13px;
+        color: #6c757d;
+        margin-top: 5px;
+        font-style: italic;
+      }
+      .form-label {
+        font-weight: 600;
+        color: #495057;
+      }
+      .btn-primary {
+        background-color: white;
         border: none;
-        padding: 10px 15px;
-        border-radius: 4px;
-        cursor: pointer;
+        padding: 10px 20px;
+        font-weight: 500;
+      }
+      h1 {
+        color: #343a40;
+        margin-bottom: 25px;
+        text-align: center;
+        font-weight: 700;
+      }
+      .map-instructions {
+        background-color: #e9f5ff;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        font-size: 0.9rem;
+      }
+      .spinner-border {
+        display: inline-block;
+        width: 1rem;
+        height: 1rem;
+        vertical-align: text-bottom;
+        border: 0.2em solid currentColor;
+        border-right-color: transparent;
+        border-radius: 50%;
+        animation: spinner-border 0.75s linear infinite;
+      }
+      @keyframes spinner-border {
+        to {
+          transform: rotate(360deg);
+        }
       }
     </style>
   </head>
   <body>
-    <h1>Registrar Negocio</h1>
-    <form id="businessForm">
-      <div class="form-group">
-        <label for="nombre">Nombre del Negocio*</label>
-        <input type="text" id="nombre" name="nombre" required />
-      </div>
+    <div class="form-container">
+      <h1><i class="bi bi-shop"></i> Registrar Negocio</h1>
+      <form id="businessForm">
+        <!-- Nombre -->
+        <div class="mb-3">
+          <label for="nombre" class="form-label">Nombre del Negocio</label>
+          <input type="text" class="form-control" id="nombre" required />
+        </div>
 
-      <div class="form-group">
-        <label for="direccion">Dirección*</label>
-        <input type="text" id="direccion" name="direccion" required />
-      </div>
+        <!-- Mapa -->
+        <div class="mb-3">
+          <label class="form-label">Ubicación del Negocio</label>
+          <div class="map-instructions">
+            <i class="bi bi-info-circle"></i> Haz clic en el mapa o arrastra el
+            marcador para establecer la ubicación exacta
+          </div>
+          <div id="map"></div>
+          <div class="coordinates">
+            Coordenadas: <span id="coordinates">0, 0</span>
+          </div>
+          <input type="hidden" id="latitud" required />
+          <input type="hidden" id="longitud" required />
+        </div>
 
-      <div class="form-group">
-        <label for="telefono">Teléfono*</label>
-        <input type="tel" id="telefono" name="telefono" required />
-      </div>
+        <!-- Teléfono -->
+        <div class="mb-3">
+          <label for="telefono" class="form-label">Teléfono</label>
+          <input type="tel" class="form-control" id="telefono" required />
+        </div>
 
-      <div class="form-group">
-        <label for="categoria">Categoría*</label>
-        <select id="categoria" name="categoria" required>
-          <option value="restaurante">Restaurante</option>
-          <option value="tienda">Tienda</option>
-          <option value="servicio">Servicio</option>
-        </select>
-      </div>
+        <!-- Categoría -->
+        <div class="mb-3">
+          <label for="categoria" class="form-label">Categoría</label>
+          <select class="form-select" id="categoria" required>
+            <option value="">Seleccione...</option>
+            <option value="restaurante">Restaurante</option>
+            <option value="tienda">Tienda</option>
+            <option value="servicio">Servicio</option>
+            <option value="hotel">Hotel</option>
+            <option value="entretenimiento">Entretenimiento</option>
+          </select>
+        </div>
 
-      <div class="form-group">
-        <label for="horario">Horario</label>
-        <input
-          type="text"
-          id="horario"
-          name="horario"
-          placeholder="Ej: Lunes a Viernes 9AM-6PM"
-        />
-      </div>
+        <!-- Horario -->
+        <div class="mb-3">
+          <label for="horario" class="form-label">Horario</label>
+          <input
+            type="text"
+            class="form-control"
+            id="horario"
+            placeholder="Ej: Lunes a Viernes 9:00 AM - 6:00 PM"
+          />
+        </div>
 
-      <div class="form-group">
-        <label for="descripcion">Descripción</label>
-        <textarea id="descripcion" name="descripcion" rows="3"></textarea>
-      </div>
+        <!-- Descripción -->
+        <div class="mb-3">
+          <label for="descripcion" class="form-label">Descripción</label>
+          <textarea
+            class="form-control"
+            id="descripcion"
+            rows="3"
+            placeholder="Describa su negocio..."
+          ></textarea>
+        </div>
 
-      <button type="submit">Guardar Negocio</button>
-    </form>
+        <div class="d-grid gap-2">
+          <button type="submit" class="btn btn-primary" style="color: black">
+            <i class="bi bi-check-circle"></i> Registrar Negocio
+          </button>
+        </div>
+      </form>
+    </div>
 
-    <!-- Importa Firebase y tu script -->
+    <!-- Firebase SDK v9 (compatibilidad) -->
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
-    <script type="module" src="/src/save-business.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <!-- Leaflet -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      // Configuración Firebase
+      const firebaseConfig = {
+        apiKey: "AIzaSyBm6n7ZqAPl_QaYSVE8nsJ9fKMUCGIgsfs",
+        authDomain: "ubicate-d4856.firebaseapp.com",
+        projectId: "ubicate-d4856",
+        storageBucket: "ubicate-d4856.appspot.com",
+        messagingSenderId: "1049935204935",
+        appId: "1:1049935204935:web:5397f73293ca15f3bad762",
+      };
+
+      // Inicializar Firebase
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+      const auth = firebase.auth();
+
+      // Inicializar mapa
+      const map = L.map("map").setView([13.6929, -89.2182], 15); // Coordenadas iniciales (El Salvador)
+
+      // Capa de OpenStreetMap
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      }).addTo(map);
+
+      // Marcador arrastrable
+      const marker = L.marker(map.getCenter(), {
+        draggable: true,
+        autoPan: true,
+      })
+        .addTo(map)
+        .bindPopup("Arrástrame a la ubicación exacta")
+        .openPopup();
+
+      // Actualizar coordenadas al mover el marcador
+      marker.on("dragend", function (e) {
+        updateCoordinates(marker.getLatLng());
+      });
+
+      // Permitir clic en el mapa para mover el marcador
+      map.on("click", function (e) {
+        marker.setLatLng(e.latLng);
+        updateCoordinates(e.latLng);
+      });
+
+      // Función para actualizar las coordenadas mostradas
+      function updateCoordinates(latLng) {
+        document.getElementById("latitud").value = latLng.lat;
+        document.getElementById("longitud").value = latLng.lng;
+        document.getElementById(
+          "coordinates"
+        ).textContent = `${latLng.lat.toFixed(6)}, ${latLng.lng.toFixed(6)}`;
+      }
+
+      // Función mejorada para guardar negocios
+      async function guardarNegocio(datosNegocio) {
+        try {
+          // Autenticación anónima si no hay usuario
+          if (!auth.currentUser) {
+            await auth.signInAnonymously();
+          }
+
+          // Guardar en la estructura ubicate/negocios/registros
+          const docRef = await db
+            .collection("ubicate")
+            .doc("negocios")
+            .collection("registros")
+            .add({
+              ...datosNegocio,
+              ubicacion: new firebase.firestore.GeoPoint(
+                datosNegocio.lat,
+                datosNegocio.lng
+              ),
+              fechaRegistro: firebase.firestore.FieldValue.serverTimestamp(),
+              usuarioId: auth.currentUser?.uid || "anonimo",
+              estado: "activo",
+            });
+
+          console.log("Documento guardado con ID:", docRef.id);
+          return docRef.id;
+        } catch (error) {
+          console.error("Error al guardar:", error);
+          throw error;
+        }
+      }
+
+      // Manejar envío del formulario
+      document
+        .getElementById("businessForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const submitBtn = e.target.querySelector('button[type="submit"]');
+          const originalText = submitBtn.innerHTML;
+
+          try {
+            // Validaciones
+            const lat = parseFloat(document.getElementById("latitud").value);
+            const lng = parseFloat(document.getElementById("longitud").value);
+
+            if (isNaN(lat) || isNaN(lng)) {
+              throw new Error("Seleccione una ubicación válida en el mapa");
+            }
+
+            // Mostrar carga
+            submitBtn.innerHTML =
+              '<span class="spinner-border spinner-border-sm"></span> Guardando...';
+            submitBtn.disabled = true;
+
+            // Preparar datos
+            const businessData = {
+              nombre: document.getElementById("nombre").value.trim(),
+              telefono: document.getElementById("telefono").value.trim(),
+              categoria: document.getElementById("categoria").value,
+              horario:
+                document.getElementById("horario").value.trim() ||
+                "No especificado",
+              descripcion:
+                document.getElementById("descripcion").value.trim() ||
+                "Sin descripción",
+              lat,
+              lng,
+            };
+
+            // Guardar usando la función mejorada
+            await guardarNegocio(businessData);
+
+            alert("¡Negocio registrado con éxito!");
+            window.location.href = "principal.html";
+          } catch (error) {
+            console.error("Error:", error);
+            alert(`Error: ${error.message}`);
+          } finally {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+          }
+        });
+
+      // Opcional: Centrar mapa en ubicación del usuario
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const userLatLng = L.latLng(
+              position.coords.latitude,
+              position.coords.longitude
+            );
+            map.setView(userLatLng, 15);
+            marker.setLatLng(userLatLng);
+            updateCoordinates(userLatLng);
+          },
+          (error) => {
+            console.warn("No se pudo obtener la ubicación:", error.message);
+          }
+        );
+      }
+    </script>
   </body>
 </html>

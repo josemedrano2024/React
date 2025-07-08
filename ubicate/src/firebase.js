@@ -1,7 +1,13 @@
 // src/firebase.js
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  serverTimestamp,
+  GeoPoint,
+} from "firebase/firestore";
+import { getAuth, signInAnonymously } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBm6n7ZqAPl_QaYSVE8nsJ9fKMUCGIgsfs",
@@ -12,23 +18,34 @@ const firebaseConfig = {
   appId: "1:1049935204935:web:5397f73293ca15f3bad762",
 };
 
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
 export const guardarNegocio = async (datosNegocio) => {
   try {
-    await setDoc(doc(db, "ubicate", "Negocios"), datosNegocio);
-    console.log("Negocio registrado en Firestore!");
-    return true;
+    // Autenticación anónima si no hay usuario
+    if (!auth.currentUser) {
+      await signInAnonymously(auth);
+    }
+
+    // Guardar en la subcolección "registros" dentro de "ubicate/negocios"
+    const docRef = await addDoc(
+      collection(db, "ubicate", "negocios", "registros"),
+      {
+        ...datosNegocio,
+        fechaRegistro: serverTimestamp(),
+        ubicacion: new GeoPoint(datosNegocio.lat, datosNegocio.lng),
+        usuarioId: auth.currentUser?.uid || "anonimo",
+      }
+    );
+
+    console.log("Documento guardado con ID:", docRef.id);
+    return docRef.id;
   } catch (error) {
     console.error("Error al guardar:", error);
-    return false;
+    throw error;
   }
 };
 
-const app = initializeApp(firebaseConfig);
-
-export const auth = getAuth(app);
-
-// Inicializa Firestore
-const db = getFirestore(app);
-
-// ✅ Exporta db
-export { db };
+export { db, auth };

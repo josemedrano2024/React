@@ -2,13 +2,16 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <title>Ubicate</title>
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
+    <title>Úbicate</title>
     <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
     <!-- Bootstrap CSS -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
@@ -19,30 +22,191 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
     />
-    <link rel="stylesheet" href="src/mapa.css" />
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f8f9fa;
+      }
+      .navbar-custom {
+        background-color: #4285f4;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      .navbar-title {
+        color: white;
+        font-weight: 600;
+        font-size: 1.2rem;
+        flex-grow: 1;
+        text-align: center;
+      }
+      .logo-img {
+        height: 40px;
+      }
+      .search-container {
+        padding: 15px;
+        background: white;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      }
+      .input-direccion {
+        width: 75%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 20px 0 0 20px;
+      }
+      .search-btn {
+        width: 25%;
+        padding: 10px;
+        background: #34a853;
+        margin-left: 50px;
+        color: white;
+        border: none;
+        border-radius: 0 20px 20px 0;
+        cursor: pointer;
+      }
+      #map {
+        height: 55vh;
+        width: 100%;
+        z-index: 1;
+      }
+      .business-list-container {
+        padding: 20px;
+        background: white;
+        border-radius: 15px 15px 0 0;
+        margin-top: -20px;
+        position: relative;
+        z-index: 2;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+      }
+      .business-card {
+        margin-bottom: 15px;
+        padding: 15px;
+        border-radius: 10px;
+        background: #fff;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        border-left: 4px solid #4285f4;
+      }
+      .business-card h5 {
+        color: #4285f4;
+        margin-bottom: 5px;
+      }
+      .botones-flotantes {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        z-index: 1000;
+      }
+      .boton-accion {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: #4285f4;
+        color: white;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+      }
+      .btn-with-img {
+        background: none;
+        border: none;
+        padding: 0;
+      }
+      .btn-img {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+      }
+      .leaflet-popup-content {
+        min-width: 200px;
+      }
+      .popup-title {
+        font-weight: bold;
+        color: #4285f4;
+        margin-bottom: 5px;
+      }
+      .popup-info {
+        margin: 3px 0;
+        font-size: 0.9rem;
+      }
+      .popup-info i {
+        width: 15px;
+        text-align: center;
+        margin-right: 5px;
+        color: #6c757d;
+      }
+      .spinner-border {
+        display: inline-block;
+        width: 1rem;
+        height: 1rem;
+        vertical-align: text-bottom;
+        border: 0.2em solid currentColor;
+        border-right-color: transparent;
+        border-radius: 50%;
+        animation: spinner-border 0.75s linear infinite;
+      }
+      @keyframes spinner-border {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .dropdown {
+        position: relative;
+        display: inline-block;
+      }
+
+      .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #f9f9f9;
+        min-width: 160px;
+        box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+        z-index: 1;
+      }
+
+      .dropdown-content a {
+        color: black;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+      }
+
+      .dropdown-content a:hover {
+        background-color: #f1f1f1;
+      }
+
+      .dropdown-toggle:focus + .dropdown-content,
+      .dropdown-content:hover {
+        display: block;
+      }
+    </style>
   </head>
   <body>
-    <!-- Navbar optimizado para móviles -->
+    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light navbar-custom">
       <div class="container-fluid">
-        <!-- Logo -->
         <a class="navbar-brand" href="#">
           <img src="src/assets/Logo.jpeg" alt="Logo" class="logo-img" />
         </a>
-
-        <!-- Título centrado -->
         <div class="navbar-title">Bienvenido</div>
-
-        <!-- Botón de cuenta -->
-        <button class="btn-with-img">
-          <span class="d-none d-sm-inline"></span>
-          <img
-            href="formularionegocio.html"
-            src="src/assets/usuario.png"
-            alt="Usuario"
-            class="btn-img"
-          />
-        </button>
+        <div class="dropdown">
+          <button
+            class="btn-with-img dropdown-toggle"
+            onclick="toggleDropdown()"
+          >
+            <img src="src/assets/usuario.png" alt="Usuario" class="btn-img" />
+          </button>
+          <div class="dropdown-content" id="myDropdown">
+            <a href="usuario.html">Perfil</a>
+            <a href="#" onclick="cerrarSesion()">Cerrar Sesión</a>
+          </div>
+        </div>
       </div>
     </nav>
 
@@ -57,16 +221,13 @@
       <button onclick="buscarDireccion()" class="search-btn">Buscar</button>
     </div>
 
-       
-    
-    <div class="container">
-        <div id="map" class="mapa"></div>
+    <!-- Mapa -->
+    <div id="map"></div>
 
-        <h1>Negocios Cercanos</h1>
-    <a href="formularionegocio.html">➕ Registrar nuevo negocio</a>
-        <!-- Lista de negocios -->
-        <div id="business-list"></div>
-    </div>
+    <!-- Lista de negocios -->
+    <div class="business-list-container">
+      <h4><i class="bi bi-geo-alt"></i> Negocios cercanos</h4>
+      <div id="business-list"></div>
     </div>
 
     <!-- Botones flotantes -->
@@ -83,55 +244,233 @@
     </div>
 
     <!-- Scripts -->
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
 
     <script>
-      // Inicializar mapa
-      const map = L.map("map").setView([13.4846, -88.1834], 13);
+      // Configuración Firebase
+      const firebaseConfig = {
+        apiKey: "AIzaSyBm6n7ZqAPl_QaYSVE8nsJ9fKMUCGIgsfs",
+        authDomain: "ubicate-d4856.firebaseapp.com",
+        projectId: "ubicate-d4856",
+        storageBucket: "ubicate-d4856.appspot.com",
+        messagingSenderId: "1049935204935",
+        appId: "1:1049935204935:web:5397f73293ca15f3bad762",
+      };
 
+      // Inicializar Firebase
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+      const auth = firebase.auth();
+
+      // Inicializar mapa
+      const map = L.map("map").setView([13.6929, -89.2182], 13); // Coordenadas iniciales (El Salvador)
+
+      // Capa de OpenStreetMap
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "© OpenStreetMap contributors",
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
         maxZoom: 19,
       }).addTo(map);
 
-      let marcador;
+      // Iconos personalizados
+      const userIcon = L.icon({
+        iconUrl: "src/assets/ubicacion.png",
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+      });
 
-      // Obtener ubicación actual
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            const lat = pos.coords.latitude;
-            const lon = pos.coords.longitude;
-            map.setView([lat, lon], 15);
+      const businessIcon = L.icon({
+        iconUrl: "https://cdn-icons-png.flaticon.com/512/284/284489.png",
+        iconSize: [28, 28],
+        iconAnchor: [14, 28],
+        popupAnchor: [0, -28],
+      });
 
-            // Icono personalizado
-            const iconoPersona = L.icon({
-              iconUrl: "src/assets/usuario.png",
-              iconSize: [32, 32],
-              iconAnchor: [16, 32],
-              popupAnchor: [0, -32],
+      // Marcador de usuario
+      let userMarker;
+      let businessMarkers = [];
+
+      // Función para cargar negocios desde Firestore
+      function loadBusinesses(center = null, radiusKm = 5) {
+        // Limpiar marcadores existentes
+        businessMarkers.forEach((marker) => map.removeLayer(marker));
+        businessMarkers = [];
+
+        const negociosRef = db
+          .collection("ubicate")
+          .doc("negocios")
+          .collection("registros");
+
+        negociosRef
+          .get()
+          .then((querySnapshot) => {
+            const businesses = [];
+
+            querySnapshot.forEach((doc) => {
+              const business = doc.data();
+              business.id = doc.id;
+
+              // Filtrar por distancia si hay un centro
+              if (center) {
+                const businessLatLng = L.latLng(
+                  business.ubicacion.latitude,
+                  business.ubicacion.longitude
+                );
+                const distance = center.distanceTo(businessLatLng) / 1000;
+                if (distance > radiusKm) return;
+              }
+
+              businesses.push(business);
+              addBusinessMarker(business);
             });
 
-            marcador = L.marker([lat, lon], { icon: iconoPersona })
+            updateBusinessList(businesses);
+          })
+          .catch((error) => {
+            console.error("Error al cargar negocios:", error);
+            alert("Error al cargar negocios. Por favor recarga la página.");
+          });
+      }
+
+      // Función para añadir marcadores al mapa
+      function addBusinessMarker(business) {
+        if (!business.ubicacion) {
+          console.warn("Negocio sin ubicación:", business);
+          return;
+        }
+
+        const marker = L.marker(
+          [business.ubicacion.latitude, business.ubicacion.longitude],
+          { icon: businessIcon }
+        ).addTo(map);
+
+        // Popup con información del negocio
+        marker.bindPopup(`
+                <div class="popup-title">${business.nombre}</div>
+                <div class="popup-info"><i class="bi bi-telephone"></i> ${
+                  business.telefono
+                }</div>
+                <div class="popup-info"><i class="bi bi-clock"></i> ${
+                  business.horario || "No especificado"
+                }</div>
+                <div class="popup-info"><i class="bi bi-tag"></i> ${
+                  business.categoria
+                }</div>
+            `);
+
+        businessMarkers.push(marker);
+      }
+
+      // Función para actualizar la lista de negocios
+      function updateBusinessList(businesses) {
+        const businessList = document.getElementById("business-list");
+        businessList.innerHTML = "";
+
+        if (businesses.length === 0) {
+          businessList.innerHTML = `
+                    <div class="alert alert-info">
+                        No se encontraron negocios cercanos. Sé el primero en registrar uno.
+                    </div>
+                `;
+          return;
+        }
+
+        businesses.forEach((business) => {
+          const card = document.createElement("div");
+          card.className = "business-card";
+          card.innerHTML = `
+                    <h5>${business.nombre}</h5>
+                    <p><i class="bi bi-telephone"></i> ${business.telefono}</p>
+                    <p><i class="bi bi-clock"></i> ${
+                      business.horario || "No especificado"
+                    }</p>
+                    <p class="text-muted"><small>${
+                      business.categoria
+                    }</small></p>
+                    <button onclick="focusBusiness('${
+                      business.id
+                    }')" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-geo-alt"></i> Ver en mapa
+                    </button>
+                `;
+          businessList.appendChild(card);
+        });
+      }
+
+      // Función para centrar el mapa en un negocio específico
+      function focusBusiness(businessId) {
+        db.collection("ubicate")
+          .doc("negocios")
+          .collection("registros")
+          .doc(businessId)
+          .get()
+          .then((doc) => {
+            if (doc.exists) {
+              const business = doc.data();
+              map.setView(
+                [business.ubicacion.latitude, business.ubicacion.longitude],
+                16
+              );
+              // Abrir popup del marcador
+              const marker = businessMarkers.find(
+                (m) =>
+                  m.getLatLng().lat === business.ubicacion.latitude &&
+                  m.getLatLng().lng === business.ubicacion.longitude
+              );
+              if (marker) marker.openPopup();
+            }
+          });
+      }
+
+      // Escuchar nuevos negocios en tiempo real
+      db.collection("ubicate")
+        .doc("negocios")
+        .collection("registros")
+        .onSnapshot((snapshot) => {
+          snapshot.docChanges().forEach((change) => {
+            if (change.type === "added") {
+              const business = change.doc.data();
+              business.id = change.doc.id;
+              addBusinessMarker(business);
+              updateBusinessList([business]);
+            }
+          });
+        });
+
+      // Obtener ubicación del usuario
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const userLatLng = L.latLng(
+              position.coords.latitude,
+              position.coords.longitude
+            );
+            map.setView(userLatLng, 15);
+
+            // Marcador de usuario
+            userMarker = L.marker(userLatLng, {
+              icon: userIcon,
+              zIndexOffset: 1000,
+            })
               .addTo(map)
-              .bindPopup("📍 Estás aquí")
-              .openPopup();
+              .bindPopup("<b>Tu ubicación</b>");
+
+            // Cargar negocios cercanos
+            loadBusinesses(userLatLng);
           },
-          (err) => {
-            console.warn("No se pudo obtener ubicación:", err.message);
-            // Marcador por defecto si no se obtiene ubicación
-            marcador = L.marker([13.4846, -88.1834])
-              .addTo(map)
-              .bindPopup("📍 Ubicación por defecto")
-              .openPopup();
-          },
-          {
-            enableHighAccuracy: true,
-            timeout: 5000,
-            maximumAge: 0,
+          (error) => {
+            console.warn("No se pudo obtener ubicación:", error.message);
+            // Cargar todos los negocios si no hay geolocalización
+            loadBusinesses();
           }
         );
+      } else {
+        loadBusinesses();
       }
 
       // Buscar dirección
@@ -142,10 +481,9 @@
           return;
         }
 
-        // Mostrar indicador de carga
         const btnBuscar = document.querySelector(".search-btn");
         btnBuscar.innerHTML =
-          '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Buscando...';
+          '<span class="spinner-border spinner-border-sm"></span> Buscando...';
         btnBuscar.disabled = true;
 
         fetch(
@@ -163,21 +501,14 @@
             const lugar = data[0];
             const lat = parseFloat(lugar.lat);
             const lon = parseFloat(lugar.lon);
+            const newLatLng = L.latLng(lat, lon);
 
-            map.setView([lat, lon], 15);
-
-            if (marcador) map.removeLayer(marcador);
-
-            marcador = L.marker([lat, lon])
-              .addTo(map)
-              .bindPopup(`📍 ${lugar.display_name}`)
-              .openPopup();
+            map.setView(newLatLng, 15);
+            loadBusinesses(newLatLng);
           })
           .catch((err) => {
             console.error("Error al buscar dirección:", err);
-            alert(
-              "Ocurrió un error al buscar la dirección. Intenta nuevamente."
-            );
+            alert("Error al buscar la dirección. Intenta nuevamente.");
           })
           .finally(() => {
             btnBuscar.innerHTML = "Buscar";
@@ -194,98 +525,74 @@
           }
         });
 
-      document
-        .getElementById("btnFavoritos")
-        .addEventListener("click", function () {
-          alert("Mostrando lugares favoritos");
-          // Aquí iría la lógica para filtrar lugares favoritos
-        });
-
+      // Botón para centrar en ubicación actual
       document
         .getElementById("btnInicio")
         .addEventListener("click", function () {
-          alert("Centrando mapa en tu ubicación");
-          // Centrar mapa en ubicación actual
           if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
-              (pos) => {
-                const lat = pos.coords.latitude;
-                const lon = pos.coords.longitude;
-                map.setView([lat, lon], 15);
+              (position) => {
+                const userLatLng = L.latLng(
+                  position.coords.latitude,
+                  position.coords.longitude
+                );
+                map.setView(userLatLng, 15);
+                loadBusinesses(userLatLng);
               },
-              (err) => {
-                console.error("Error al obtener ubicación:", err);
+              (error) => {
+                console.error("Error al obtener ubicación:", error);
+                alert("No se pudo obtener tu ubicación actual.");
               }
             );
+          } else {
+            alert("Tu navegador no soporta geolocalización.");
           }
         });
 
+      // Botón de favoritos
+      document
+        .getElementById("btnFavoritos")
+        .addEventListener("click", function () {
+          alert("Mostrando negocios favoritos");
+          // Implementar lógica de favoritos según tu necesidad
+        });
+
+      // Botón de mapa
       document.getElementById("btnMapa").addEventListener("click", function () {
-        alert("Alternando vista del mapa");
-        // Aquí iría la lógica para cambiar tipo de mapa
+        map.invalidateSize(); // Forzar redibujado del mapa si hubiera problemas
       });
 
-      // Ejemplo de cómo marcar botón activo
-      function setActiveButton(btnId) {
-        document.querySelectorAll(".boton-accion").forEach((btn) => {
-          btn.classList.remove("activo");
-        });
-        document.getElementById(btnId).classList.add("activo");
+      function toggleDropdown() {
+        document.getElementById("myDropdown").classList.toggle("show");
       }
 
-      // Inicialmente activar el botón de mapa
-      setActiveButton("btnMapa");
-    </script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
-    <script type="module" src="/src/list-business.js"></script>
+      function cerrarSesion() {
+        firebase
+          .auth()
+          .signOut()
+          .then(() => {
+            // Redirigir a la página de inicio o login
+            window.location.href = "index.html"; // Cambia "index.html" a la página que corresponda
+          })
+          .catch((error) => {
+            // Ocurrió un error al cerrar la sesión
+            console.error("Error al cerrar sesión:", error);
+            alert("Error al cerrar sesión. Intenta de nuevo.");
+          });
+      }
 
-    <style>
-         /* Reset básico */
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            font-family: Arial, sans-serif;
-        }
-
-        /* Contenedor principal (columna flexible) */
-        .app-container {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-        }
-
-        /* Mapa (altura fija en móviles, flexible en desktop) */
-        #map {
-            height: 50vh; /* Altura inicial para móviles */
-            width: 100%;
-            background: #f0f0f0; /* Color temporal */
-        }
-
-        /* Lista de negocios (con scroll) */
-        #business-list {
-            flex: 1;
-            overflow-y: auto; /* Barra de desplazamiento vertical */
-            padding: 10px;
-            background: #fff;
-        }
-
-        /* Estilo de cada tarjeta */
-        .business-card {
-            margin-bottom: 10px;
-            padding: 12px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            background: #f9f9f9;
-        }
-
-        /* Media query para pantallas más grandes */
-        @media (min-width: 768px) {
-            #map {
-                height: 60vh; /* Ajusta altura en desktop */
+      // Cierra el menú si el usuario hace clic fuera de él
+      window.onclick = function (event) {
+        if (!event.target.matches(".dropdown-toggle")) {
+          var dropdowns = document.getElementsByClassName("dropdown-content");
+          for (var i = 0; i < dropdowns.length; i++) {
+            var openDropdown = dropdowns[i];
+            if (openDropdown.classList.contains("show")) {
+              openDropdown.classList.remove("show");
             }
+          }
         }
-    </style>
+      };
+    </script>
   </body>
 </html>
