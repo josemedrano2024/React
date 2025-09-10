@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centro de Ayuda - Úbicate</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            padding-bottom: 60px; /* Espacio para botones flotantes en móviles */
+        }
+        .navbar-custom {
+            background-color: #4285f4;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .navbar-title {
+            color: white;
+            font-weight: 600;
+            font-size: 1.2rem;
+            flex-grow: 1;
+            text-align: center;
+        }
+        .logo-img {
+            height: 40px;
+        }
+        .help-container {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        .help-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .help-header h1 {
+            color: #4285f4;
+            font-weight: 700;
+            font-size: 2rem;
+        }
+        .help-header p {
+            color: #6c757d;
+            font-size: 1.1rem;
+        }
+        .search-help {
+            margin-bottom: 30px;
+        }
+        .faq-category {
+            margin-bottom: 30px;
+        }
+        .faq-category h2 {
+            color: #4285f4;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        .accordion-button:not(.collapsed) {
+            background-color: #e8f0fe;
+            color: #4285f4;
+        }
+        .contact-card {
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            margin-bottom: 20px;
+            background: white;
+        }
+        .contact-card h3 {
+            color: #4285f4;
+            margin-bottom: 20px;
+        }
+        .contact-method {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .contact-icon {
+            width: 40px;
+            height: 40px;
+            background-color: #e8f0fe;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: #4285f4;
+            font-size: 1.2rem;
+        }
+        .back-button {
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .back-button:hover {
+            background-color: #3367d6;
+        }
+        .dropdown {
+            position: relative;
+        }
+        .btn-with-img {
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+        }
+        .btn-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            top: 50px; 
+            left: 0;
+            background-color: #fff;
+            width: 200px;  
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        .dropdown-content a {
+            display: block;
+            padding: 15px;
+            text-decoration: none;
+            font-size: 16px;
+            color: #333;
+        }
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+        .show {
+            display: block;
+        }
+        
+        /* Botones flotantes para móviles */
+        .botones-flotantes {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1000;
+        }
+        .boton-accion {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #4285f4;
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+        }
+        
+        /* Estilos responsivos */
+        @media (max-width: 768px) {
+            .help-header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .help-header p {
+                font-size: 1rem;
+            }
+            
+            .faq-category h2 {
+                font-size: 1.3rem;
+            }
+            
+            .contact-card {
+                padding: 15px;
+            }
+            
+            .help-container {
+                padding: 15px;
+            }
+            
+            .search-help .input-group {
+                flex-direction: column;
+            }
+            
+            .search-help .input-group input {
+                border-radius: 0.375rem;
+                margin-bottom: 10px;
+            }
+            
+            .search-help .input-group button {
+                border-radius: 0.375rem;
+                width: 100%;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .navbar-title {
+                font-size: 1rem;
+            }
+            
+            .logo-img {
+                height: 35px;
+            }
+            
+            .help-header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .back-button {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light navbar-custom">
+        <div class="container-fluid">
+            <div class="dropdown">
+                <button class="btn-with-img dropdown-toggle" onclick="toggleDropdown()">
+                    <img src="src/assets/usuario.png" alt="Usuario" class="btn-img" />
+                </button>
+                <div class="dropdown-content" id="myDropdown">
+                    <a href="usuario.html">Perfil</a>
+                    <a href="#" onclick="cerrarSesion()">Cerrar Sesión</a>
+                    <a href="guia.html">Ayuda</a>
+                </div>
+            </div>
+            <div class="navbar-title">Centro de Ayuda</div>
+            <a class="navbar-brand" href="#">
+                <img src="src/assets/Logo.jpeg" alt="Logo" class="logo-img" />
+            </a>
+        </div>
+    </nav>
+
+    <div class="help-container">
+        <button class="back-button" onclick="window.location.href='principal.html'">
+            <i class="bi bi-arrow-left"></i> Volver a la aplicación
+        </button>
+
+        <div class="help-header">
+            <h1>¿Cómo podemos ayudarte?</h1>
+            <p>Encuentra respuestas a las preguntas más frecuentes o contacta con nuestro equipo de soporte</p>
+        </div>
+
+        <div class="search-help mb-5">
+            <div class="input-group">
+                <input type="text" class="form-control form-control-lg" placeholder="Buscar en la ayuda..." aria-label="Buscar en la ayuda">
+                <button class="btn btn-primary" type="button">
+                    <i class="bi bi-search"></i> Buscar
+                </button>
+            </div>
+        </div>
+
+        <div class="faq-category">
+            <h2>Uso de la aplicación</h2>
+            <div class="accordion" id="accordionUsage">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
+                            ¿Cómo busco negocios cercanos?
+                        </button>
+                    </h2>
+                    <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionUsage">
+                        <div class="accordion-body">
+                            Para buscar negocios cercanos, simplemente escribe lo que necesitas en la barra de búsqueda de la página principal y presiona el botón "Buscar". La aplicación mostrará resultados basados en tu ubicación actual.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
+                            ¿Cómo cambio mi ubicación manualmente?
+                        </button>
+                    </h2>
+                    <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionUsage">
+                        <div class="accordion-body">
+                            Puedes arrastrar el mapa con el dedo o el mouse para moverte a diferentes áreas. También puedes usar el botón de ubicación para centrar el mapa en tu posición actual.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">
+                            ¿Cómo agrego un negocio a favoritos?
+                        </button>
+                    </h2>
+                    <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionUsage">
+                        <div class="accordion-body">
+                            Para agregar un negocio a favoritos, abre la ficha del negocio y haz clic en el icono de estrella. Tus favoritos se guardarán para acceder rápidamente en el futuro.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-category">
+            <h2>Problemas técnicos</h2>
+            <div class="accordion" id="accordionTechnical">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour">
+                            La aplicación no detecta mi ubicación
+                        </button>
+                    </h2>
+                    <div id="collapseFour" class="accordion-collapse collapse show" data-bs-parent="#accordionTechnical">
+                        <div class="accordion-body">
+                            Asegúrate de que los servicios de ubicación estén activados en tu dispositivo y que hayas concedido permisos de ubicación a la aplicación. También verifica tu conexión a Internet.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive">
+                            Los resultados de búsqueda no aparecen
+                        </button>
+                    </h2>
+                    <div id="collapseFive" class="accordion-collapse collapse" data-bs-parent="#accordionTechnical">
+                        <div class="accordion-body">
+                            Esto puede deberse a una conexión a Internet lenta o interrumpida. Verifica tu conexión y intenta nuevamente. Si el problema persiste, reinicia la aplicación.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSix">
+                            La aplicación se cierra inesperadamente
+                        </button>
+                    </h2>
+                    <div id="collapseSix" class="accordion-collapse collapse" data-bs-parent="#accordionTechnical">
+                        <div class="accordion-body">
+                            Intenta cerrar completamente la aplicación y volverla a abrir. Si el problema continúa, reinicia tu dispositivo o actualiza la aplicación a la última versión disponible.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-category">
+            <h2>Cuenta y perfil</h2>
+            <div class="accordion" id="accordionAccount">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSeven">
+                            ¿Cómo cambio mi información de perfil?
+                        </button>
+                    </h2>
+                    <div id="collapseSeven" class="accordion-collapse collapse show" data-bs-parent="#accordionAccount">
+                        <div class="accordion-body">
+                            Para cambiar tu información de perfil, ve a la sección "Perfil" desde el menú de usuario. Allí podrás actualizar tu nombre, foto y otras preferencias.
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEight">
+                            ¿Cómo elimino mi cuenta?
+                        </button>
+                    </h2>
+                    <div id="collapseEight" class="accordion-collapse collapse" data-bs-parent="#accordionAccount">
+                        <div class="accordion-body">
+                            Para eliminar tu cuenta, contacta con nuestro equipo de soporte a través del formulario de contacto. Procesaremos tu solicitud en un plazo máximo de 48 horas.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-5">
+            <div class="col-md-6">
+                <div class="contact-card">
+                    <h3>Contacta con nosotros</h3>
+                    <div class="contact-method">
+                        <div class="contact-icon">
+                            <i class="bi bi-envelope"></i>
+                        </div>
+                        <div>
+                            <strong>Correo electrónico</strong>
+                            <p>soporte@ubicate.com</p>
+                        </div>
+                    </div>
+                    <div class="contact-method">
+                        <div class="contact-icon">
+                            <i class="bi bi-telephone"></i>
+                        </div>
+                        <div>
+                            <strong>Teléfono</strong>
+                            <p>+123 456 7890</p>
+                        </div>
+                    </div>
+                    <div class="contact-method">
+                        <div class="contact-icon">
+                            <i class="bi bi-clock"></i>
+                        </div>
+                        <div>
+                            <strong>Horario de atención</strong>
+                            <p>Lunes a Viernes: 8:00 - 18:00</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="contact-card">
+                    <h3>Envíanos un mensaje</h3>
+                    <form>
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Correo electrónico</label>
+                            <input type="email" class="form-control" id="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Mensaje</label>
+                            <textarea class="form-control" id="message" rows="4" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Enviar mensaje</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function toggleDropdown() {
+            document.getElementById("myDropdown").classList.toggle("show");
+        }
+
+        // Cierra el menú si el usuario hace clic fuera de él
+        window.onclick = function(event) {
+            if (!event.target.matches('.dropdown-toggle') && 
+                !event.target.matches('.btn-img')) {
+                var dropdowns = document.getElementsByClassName("dropdown-content");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains("show")) {
+                        openDropdown.classList.remove("show");
+                    }
+                }
+            }
+        };
+
+        // Función para cerrar sesión
+        function cerrarSesion() {
+            alert("Función de cerrar sesión activada");
+            // Aquí iría tu código de Firebase para cerrar sesión
+        }
+
+        // Manejar el envío del formulario
+        document.querySelector('form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('¡Gracias por tu mensaje! Te responderemos en breve.');
+            this.reset();
+        });
+        
+        // Mejorar la búsqueda en la página de ayuda
+        document.querySelector('.search-help button').addEventListener('click', function() {
+            const searchTerm = document.querySelector('.search-help input').value.toLowerCase();
+            if (searchTerm) {
+                // Ocultar todas las secciones primero
+                document.querySelectorAll('.accordion-collapse').forEach(collapse => {
+                    collapse.classList.remove('show');
+                });
+                
+                // Buscar en los textos de las preguntas y respuestas
+                let found = false;
+                document.querySelectorAll('.accordion-item').forEach(item => {
+                    const question = item.querySelector('.accordion-button').textContent.toLowerCase();
+                    const answer = item.querySelector('.accordion-body').textContent.toLowerCase();
+                    
+                    if (question.includes(searchTerm) || answer.includes(searchTerm)) {
+                        item.querySelector('.accordion-collapse').classList.add('show');
+                        item.scrollIntoView({behavior: 'smooth', block: 'center'});
+                        found = true;
+                    }
+                });
+                
+                if (!found) {
+                    alert('No se encontraron resultados para: ' + searchTerm);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

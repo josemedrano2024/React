@@ -1,48 +1,276 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
   <head>
-    <title>Usuario</title>
-    <!-- Required meta tags -->
+    <title>Mi Perfil - Ubicate</title>
     <meta charset="utf-8" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1, shrink-to-fit=no"
     />
-
-    <!-- Bootstrap CSS v5.2.1 -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
       rel="stylesheet"
       integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
       crossorigin="anonymous"
     />
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+      import { 
+        getAuth, 
+        onAuthStateChanged, 
+        signOut,
+        signInAnonymously 
+      } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+      import { 
+        getFirestore, 
+        doc, 
+        getDoc,
+        collection,
+        query,
+        where,
+        getDocs
+      } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyBm6n7ZqAPl_QaYSVE8nsJ9fKMUCGIgsfs",
+        authDomain: "ubicate-d4856.firebaseapp.com",
+        projectId: "ubicate-d4856",
+        storageBucket: "ubicate-d4856.firebasestorage.app",
+        messagingSenderId: "1049935204935",
+        appId: "1:1049935204935:web:5397f73293ca15f3bad762",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          try {
+            const userDocRef = doc(db, "users", user.uid);
+            const userDoc = await getDoc(userDocRef);
+            
+            if (userDoc.exists()) {
+              const userData = userDoc.data();
+              displayUserInfo(user, userData);
+            } else {
+              const negociosQuery = query(
+                collection(db, "ubicate", "negocios", "registros"),
+                where("usuarioId", "==", user.uid)
+              );
+              
+              const querySnapshot = await getDocs(negociosQuery);
+              let userData = {};
+              
+              if (!querySnapshot.empty) {
+                const firstDoc = querySnapshot.docs[0];
+                userData = firstDoc.data();
+              }
+              
+              displayUserInfo(user, userData);
+            }
+          } catch (error) {
+            console.error("Error obteniendo datos del usuario:", error);
+            displayUserInfo(user, {});
+          }
+        } else {
+
+          try {
+            await signInAnonymously(auth);
+          } catch (error) {
+            console.error("Error en autenticación:", error);
+            window.location.href = "login.html";
+          }
+        }
+      });
+      
+      function displayUserInfo(user, userData) {
+        const userInfoContainer = document.getElementById('user-info');
+        
+        const userName = user.displayName || userData.nombre || user.email.split('@')[0];
+        const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&size=100&background=007bff&color=fff`;
+        document.getElementById('user-avatar').src = avatarUrl;
+        
+        const isAnonymous = user.isAnonymous;
+        const userType = isAnonymous ? "Invitado" : "Registrado";
+        
+        userInfoContainer.innerHTML = `
+          <div class="user-details">
+            <div class="d-flex justify-content-between border-bottom py-2">
+              <strong>Nombre:</strong>
+              <span>${userData.nombre || userName || 'No proporcionado'}</span>
+            </div>
+            <div class="d-flex justify-content-between border-bottom py-2">
+              <strong>Email:</strong>
+              <span>${user.email || 'No proporcionado'}</span>
+            </div>
+            <div class="d-flex justify-content-between border-bottom py-2">
+              <strong>Teléfono:</strong>
+              <span>${userData.telefono || userData.phoneNumber || 'No proporcionado'}</span>
+            </div>
+            <div class="d-flex justify-content-between border-bottom py-2">
+              <strong>Tipo de usuario:</strong>
+              <span>${userType}</span>
+            </div>
+            <div class="d-flex justify-content-between border-bottom py-2">
+              <strong>ID de usuario:</strong>
+              <span class="text-truncate" style="max-width: 150px;">${user.uid}</span>
+            </div>
+          </div>
+        `;
+        
+        if (isAnonymous) {
+          const anonymousAlert = document.createElement('div');
+          anonymousAlert.className = 'alert alert-info mt-3';
+          anonymousAlert.innerHTML = `
+            <i class="bi bi-info-circle"></i> 
+            Eres un usuario invitado. <a href="registro.html" class="alert-link">Regístrate</a> 
+            para guardar tu información permanentemente.
+          `;
+          userInfoContainer.appendChild(anonymousAlert);
+        }
+      }
+
+      document.getElementById('logout-btn').addEventListener('click', () => {
+        signOut(auth).then(() => {
+          window.location.href = "principal.html";
+        }).catch((error) => {
+          console.error("Error al cerrar sesión:", error);
+        });
+      });
+      
+      document.getElementById('edit-profile').addEventListener('click', () => {
+        alert('Funcionalidad de edición de perfil en desarrollo.');
+      });
+      
+      window.auth = auth;
+      window.db = db;
+    </script>
+    
+    <style>
+      .back-button {
+        position: fixed;
+        top: 20px;
+        left: 15px;
+        z-index: 1000;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        transition: all 0.3s ease;
+      }
+      
+      .back-button:hover {
+        transform: scale(1.1);
+        background-color: white;
+      }
+      
+      .user-avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin: 0 auto;
+        display: block;
+        border: 3px solid #0d6efd;
+        box-shadow: 0 4px 10px rgba(13, 110, 253, 0.3);
+      }
+      
+      .user-info-card {
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        margin-top: 20px;
+        border: none;
+      }
+      
+      .loading-spinner {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 200px;
+      }
+      
+      .user-details {
+        font-size: 1rem;
+      }
+      
+      @media (max-width: 768px) {
+        .container {
+          padding-top: 30px;
+        }
+        
+        h1 {
+          font-size: 1.8rem;
+          text-align: center;
+        }
+        
+        .lead {
+          text-align: center;
+        }
+        
+        .user-details {
+          font-size: 0.9rem;
+        }
+      }
+    </style>
   </head>
 
   <body>
-    <div class="container">
-      <h1 class="mt-5">Usuario</h1>
-      <p class="lead">Bienvenido al sistema de gestión de usuarios.</p>
+    <a href="principal.html" class="back-button">
+      <i class="bi bi-arrow-left" style="font-size: 1.2rem;"></i>
+    </a>
 
-      <div class="row mt-4">
-        <div class="col-md-6">
-          <h2>Información del Usuario</h2>
-          <p>Nombre: Juan Pérez</p>
-          <p>Email: juan.perez@example.com</p>
+    <div class="container mt-4">
+      <h1 class="mt-5 pt-3">Mi Perfil</h1>
+      <p class="lead">Bienvenido al sistema de gestión de usuarios de Ubicate.</p>
+
+      <div class="row mt-4 justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+          <div class="card user-info-card">
+            <div class="card-body p-4">
+              <img id="user-avatar" src="https://ui-avatars.com/api/?name=Usuario&size=100&background=007bff&color=fff" alt="Avatar" class="user-avatar mb-3">
+              
+              <h2 class="text-center mb-4">Información del Usuario</h2>
+              
+              <div id="user-info">
+                <div class="loading-spinner">
+                  <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Cargando información...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mt-4 justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+          <div class="d-grid gap-2">
+            <a href="formularionegocio.html" class="btn btn-primary">
+              <i class="bi bi-plus-circle"></i> Registrar nuevo negocio
+            </a>
+            <button id="edit-profile" class="btn btn-outline-secondary">
+              <i class="bi bi-pencil"></i> Editar perfil
+            </button>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="d-grid mt-3">
-      <a href="formularionegocio.html" class="btn btn-primary">
-        <i class="bi bi-plus-circle"></i> Registrar nuevo negocio
-      </a>
-    </div>
-    <footer class="mt-5">
+    <footer class="mt-5 py-4">
       <div class="container text-center">
-        <p>&copy; 2023 Mi Empresa</p>
+        <p>&copy; 2023 Ubicate - Todos los derechos reservados</p>
       </div>
     </footer>
-    <!-- Bootstrap JavaScript Libraries -->
+
     <script
       src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
       integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
