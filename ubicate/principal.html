@@ -1,574 +1,599 @@
 <!DOCTYPE html>
 <html lang="es">
-
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Úbicate</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
-  <style>
-    body {
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f8f9fa;
-    }
-
-    .navbar-custom {
-      background-color: #4285f4;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    .navbar-title {
-      color: white;
-      font-weight: 600;
-      font-size: 1.2rem;
-      flex-grow: 1;
-      text-align: center;
-    }
-
-    .logo-img {
-      height: 40px;
-    }
-
-    .search-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 10px;
-      padding: 15px;
-      background: white;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-    }
-
-    .input-direccion {
-      width: 200px;
-      padding: 8px;
-      padding: 10px;
-      border: 1px solid #ddd;
-      margin-left: 25px;
-    }
-
-    .search-btn {
-      width: 80px;
-      margin-right: 30px;
-      padding: 8px;
-      padding: 10px;
-      background: #34a853;
-      margin-left: 50px;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-
-    #map {
-      height: 55vh;
-      width: 100%;
-      z-index: 1;
-    }
-
-    .business-list-container {
-      padding: 20px;
-      background: white;
-      border-radius: 15px 15px 0 0;
-      margin-top: -20px;
-      position: relative;
-      z-index: 2;
-      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-    }
-
-    .business-card {
-      margin-bottom: 15px;
-      padding: 15px;
-      border-radius: 10px;
-      background: #fff;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-      border-left: 4px solid #4285f4;
-    }
-
-    .business-card h5 {
-      color: #4285f4;
-      margin-bottom: 5px;
-    }
-
-    .botones-flotantes {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      z-index: 1000;
-    }
-
-    .boton-accion {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      background: #4285f4;
-      color: white;
-      border: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-      cursor: pointer;
-    }
-
-    .btn-with-img {
-      background: none;
-      border: none;
-      padding: 0;
-    }
-
-    .btn-img {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-    }
-
-    .leaflet-popup-content {
-      min-width: 200px;
-    }
-
-    .popup-title {
-      font-weight: bold;
-      color: #4285f4;
-      margin-bottom: 5px;
-    }
-
-    .popup-info {
-      margin: 3px 0;
-      font-size: 0.9rem;
-    }
-
-    .popup-info i {
-      width: 15px;
-      text-align: center;
-      margin-right: 5px;
-      color: #6c757d;
-    }
-
-    .spinner-border {
-      display: inline-block;
-      width: 1rem;
-      height: 1rem;
-      vertical-align: text-bottom;
-      border: 0.2em solid currentColor;
-      border-right-color: transparent;
-      border-radius: 50%;
-      animation: spinner-border 0.75s linear infinite;
-    }
-
-    @keyframes spinner-border {
-      to {
-        transform: rotate(360deg);
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Úbicate</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+    />
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f8f9fa;
       }
-    }
 
-    .dropdown {
-      position: relative;
-    }
+      .navbar-custom {
+        background-color: #4285f4;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
 
-    .btn-with-img {
-      background: none;
-      border: none;
-      padding: 0;
-      cursor: pointer;
-    }
+      .navbar-title {
+        color: white;
+        font-weight: 600;
+        font-size: 1.2rem;
+        flex-grow: 1;
+        text-align: center;
+      }
 
-    .btn-img {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-    }
+      .logo-img {
+        height: 40px;
+      }
 
-    .dropdown-content {
-      display: none;
-      position: absolute;
-      top: 50px;
-      left: 0;
-      /* Alineado a la izquierda */
-      background-color: #fff;
-      width: 200px;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-      z-index: 1000;
-    }
+      .search-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        padding: 15px;
+        background: white;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      }
 
-    .dropdown-content a {
-      display: block;
-      padding: 15px;
-      text-decoration: none;
-      font-size: 16px;
-      color: #333;
-    }
+      .input-direccion {
+        width: 200px;
+        padding: 8px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        margin-left: 25px;
+      }
 
-    .dropdown-content a:hover {
-      background-color: #f1f1f1;
-    }
+      .search-btn {
+        width: 80px;
+        margin-right: 30px;
+        padding: 8px;
+        padding: 10px;
+        background: #34a853;
+        margin-left: 50px;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
 
-    .show {
-      display: block;
-    }
-  </style>
-</head>
+      #map {
+        height: 55vh;
+        width: 100%;
+        z-index: 1;
+      }
 
-<body>
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-light navbar-custom">
-    <div class="container-fluid">
+      .business-list-container {
+        padding: 20px;
+        background: white;
+        border-radius: 15px 15px 0 0;
+        margin-top: -20px;
+        position: relative;
+        z-index: 2;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+      }
 
-      <div class="dropdown">
-        <button class="btn-with-img dropdown-toggle" onclick="toggleDropdown()">
-          <img src="src/assets/usuario.png" alt="Usuario" class="btn-img" />
-        </button>
-        <div class="dropdown-content" id="myDropdown">
-          <a href="usuario.html">Perfil</a>
-          <a href="#" onclick="cerrarSesion()">Cerrar Sesión</a>
-          <a href="guia.html">Ayuda</a>
-        </div>
-      </div>
-      <div class="navbar-title">Bienvenido</div>
+      .business-card {
+        margin-bottom: 15px;
+        padding: 15px;
+        border-radius: 10px;
+        background: #fff;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        border-left: 4px solid #4285f4;
+      }
 
-      <a class="navbar-brand" href="#">
-        <img src="src/assets/Logo.jpeg" alt="Logo" class="logo-img" />
-      </a>
-    </div>
-  </nav>
+      .business-card h5 {
+        color: #4285f4;
+        margin-bottom: 5px;
+      }
 
-  <!-- Barra de búsqueda -->
-  <div class="search-container">
-    <input type="text" id="direccion" class="input-direccion" placeholder="¿Qué buscas hoy?" />
-    <button onclick="buscarDireccion()" class="search-btn">Buscar</button>
-  </div>
+      .botones-flotantes {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        z-index: 1000;
+      }
 
-  <!-- Mapa -->
-  <div id="map"></div>
+      .boton-accion {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: #4285f4;
+        color: white;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+      }
 
-  <!-- Lista de negocios -->
-  <div class="business-list-container">
-    <h4><i class="bi bi-geo-alt"></i> Negocios cercanos</h4>
-    <div id="business-list"></div>
-  </div>
+      .btn-with-img {
+        background: none;
+        border: none;
+        padding: 0;
+      }
 
-  <!-- Botones flotantes -->
-  <div class="botones-flotantes">
-    <button class="boton-accion" id="btnFavoritos" title="Favoritos">
-      <i class="bi bi-star"></i>
-    </button>
-  </div>
+      .btn-img {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+      }
 
-  <footer class="mt-5 py-4">
-    <div class="container text-center">
-      <p>&copy; 2023 Ubicate - Todos los derechos reservados</p>
-    </div>
-  </footer>
+      .leaflet-popup-content {
+        min-width: 200px;
+      }
 
-  <!-- Scripts -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+      .popup-title {
+        font-weight: bold;
+        color: #4285f4;
+        margin-bottom: 5px;
+      }
 
-  <script>
+      .popup-info {
+        margin: 3px 0;
+        font-size: 0.9rem;
+      }
 
-    function toggleDropdown() {
-      document.getElementById("myDropdown").classList.toggle("show");
-    }
+      .popup-info i {
+        width: 15px;
+        text-align: center;
+        margin-right: 5px;
+        color: #6c757d;
+      }
 
-    // Cierra el menú si el usuario hace clic fuera de él
-    window.onclick = function (event) {
-      if (!event.target.matches('.dropdown-toggle') &&
-        !event.target.matches('.btn-img')) {
-        var dropdowns = document.getElementsByClassName("dropdown-content");
-        for (var i = 0; i < dropdowns.length; i++) {
-          var openDropdown = dropdowns[i];
-          if (openDropdown.classList.contains("show")) {
-            openDropdown.classList.remove("show");
-          }
+      .spinner-border {
+        display: inline-block;
+        width: 1rem;
+        height: 1rem;
+        vertical-align: text-bottom;
+        border: 0.2em solid currentColor;
+        border-right-color: transparent;
+        border-radius: 50%;
+        animation: spinner-border 0.75s linear infinite;
+      }
+
+      @keyframes spinner-border {
+        to {
+          transform: rotate(360deg);
         }
       }
-    };
-    // Configuración Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyBm6n7ZqAPl_QaYSVE8nsJ9fKMUCGIgsfs",
-      authDomain: "ubicate-d4856.firebaseapp.com",
-      projectId: "ubicate-d4856",
-      storageBucket: "ubicate-d4856.appspot.com",
-      messagingSenderId: "1049935204935",
-      appId: "1:1049935204935:web:5397f73293ca15f3bad762",
-    };
 
-    // Inicializar Firebase
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const auth = firebase.auth();
-
-    // Inicializar mapa
-    const map = L.map("map").setView([13.6929, -89.2182], 13); // Coordenadas iniciales (El Salvador)
-
-    // Capa de OpenStreetMap
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-      maxZoom: 19,
-    }).addTo(map);
-
-    // Iconos personalizados
-    const userIcon = L.icon({
-      iconUrl: "src/assets/ubicacion.png",
-      iconSize: [32, 32],
-      iconAnchor: [16, 32],
-    });
-
-    const businessIcon = L.icon({
-      iconUrl: "https://cdn-icons-png.flaticon.com/512/284/284489.png",
-      iconSize: [28, 28],
-      iconAnchor: [14, 28],
-      popupAnchor: [0, -28],
-    });
-
-    // Marcador de usuario
-    let userMarker;
-    let businessMarkers = [];
-
-    // Función para cargar negocios desde Firestore
-    function loadBusinesses(center = null, radiusKm = 5) {
-      // Limpiar marcadores existentes
-      businessMarkers.forEach((marker) => map.removeLayer(marker));
-      businessMarkers = [];
-
-      const negociosRef = db
-        .collection("ubicate")
-        .doc("negocios")
-        .collection("registros");
-
-      negociosRef
-        .get()
-        .then((querySnapshot) => {
-          const businesses = [];
-
-          querySnapshot.forEach((doc) => {
-            const business = doc.data();
-            business.id = doc.id;
-
-            // Filtrar por distancia si hay un centro
-            if (center) {
-              const businessLatLng = L.latLng(
-                business.ubicacion.latitude,
-                business.ubicacion.longitude
-              );
-              const distance = center.distanceTo(businessLatLng) / 1000;
-              if (distance > radiusKm) return;
-            }
-
-            businesses.push(business);
-            addBusinessMarker(business);
-          });
-
-          updateBusinessList(businesses);
-        })
-        .catch((error) => {
-          console.error("Error al cargar negocios:", error);
-          alert("Error al cargar negocios. Por favor recarga la página.");
-        });
-    }
-
-    // Función para añadir marcadores al mapa
-    function addBusinessMarker(business) {
-      if (!business.ubicacion) {
-        console.warn("Negocio sin ubicación:", business);
-        return;
+      .dropdown {
+        position: relative;
       }
 
-      const marker = L.marker(
-        [business.ubicacion.latitude, business.ubicacion.longitude],
-        { icon: businessIcon }
-      ).addTo(map);
+      .btn-with-img {
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+      }
 
-      // Popup con información del negocio
-      marker.bindPopup(`
+      .btn-img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+      }
+
+      .dropdown-content {
+        display: none;
+        position: absolute;
+        top: 50px;
+        right: 0;
+        /* Alineado a la izquierda */
+        background-color: #fff;
+        width: 150px;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+      }
+
+      .dropdown-content a {
+        display: block;
+        padding: 15px;
+        text-decoration: none;
+        font-size: 16px;
+        color: #333;
+        text-align: center;
+      }
+
+      .dropdown-content a:hover {
+        background-color: #f1f1f1;
+      }
+
+      .show {
+        display: block;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light navbar-custom">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+          <img src="src/assets/Logo.jpeg" alt="Logo" class="logo-img" />
+        </a>
+        <div class="navbar-title">Bienvenido</div>
+
+        <div class="dropdown">
+          <button
+            class="btn-with-img dropdown-toggle"
+            onclick="toggleDropdown()"
+          >
+            <img src="src/assets/usuario.png" alt="Usuario" class="btn-img" />
+          </button>
+          <div class="dropdown-content" id="myDropdown">
+            <a href="usuario.html">Perfil</a>
+            <a href="#" onclick="cerrarSesion()">Cerrar Sesión</a>
+            <a href="guia.html">Ayuda</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Barra de búsqueda -->
+    <div class="search-container">
+      <input
+        type="text"
+        id="direccion"
+        class="input-direccion"
+        placeholder="¿Qué buscas hoy?"
+      />
+      <button onclick="buscarDireccion()" class="search-btn">Buscar</button>
+    </div>
+
+    <!-- Mapa -->
+    <div id="map"></div>
+
+    <!-- Lista de negocios -->
+    <div class="business-list-container">
+      <h4><i class="bi bi-geo-alt"></i> Negocios cercanos</h4>
+      <div id="business-list"></div>
+    </div>
+
+    <!-- Botones flotantes -->
+    <div class="botones-flotantes">
+      <button class="boton-accion" id="btnFavoritos" title="Favoritos">
+        <i class="bi bi-star"></i>
+      </button>
+    </div>
+
+    <footer class="mt-5 py-4">
+      <div class="container text-center">
+        <p>&copy; 2023 Ubicate - Todos los derechos reservados</p>
+      </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+
+    <script>
+      function toggleDropdown() {
+        document.getElementById("myDropdown").classList.toggle("show");
+      }
+
+      // Cierra el menú si el usuario hace clic fuera de él
+      window.onclick = function (event) {
+        if (
+          !event.target.matches(".dropdown-toggle") &&
+          !event.target.matches(".btn-img")
+        ) {
+          var dropdowns = document.getElementsByClassName("dropdown-content");
+          for (var i = 0; i < dropdowns.length; i++) {
+            var openDropdown = dropdowns[i];
+            if (openDropdown.classList.contains("show")) {
+              openDropdown.classList.remove("show");
+            }
+          }
+        }
+      };
+      // Configuración Firebase
+      const firebaseConfig = {
+        apiKey: "AIzaSyBm6n7ZqAPl_QaYSVE8nsJ9fKMUCGIgsfs",
+        authDomain: "ubicate-d4856.firebaseapp.com",
+        projectId: "ubicate-d4856",
+        storageBucket: "ubicate-d4856.appspot.com",
+        messagingSenderId: "1049935204935",
+        appId: "1:1049935204935:web:5397f73293ca15f3bad762",
+      };
+
+      // Inicializar Firebase
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+      const auth = firebase.auth();
+
+      // Inicializar mapa
+      const map = L.map("map").setView([13.6929, -89.2182], 13); // Coordenadas iniciales (El Salvador)
+
+      // Capa de OpenStreetMap
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        maxZoom: 19,
+      }).addTo(map);
+
+      // Iconos personalizados
+      const userIcon = L.icon({
+        iconUrl: "src/assets/ubicacion.png",
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+      });
+
+      const businessIcon = L.icon({
+        iconUrl: "https://cdn-icons-png.flaticon.com/512/284/284489.png",
+        iconSize: [28, 28],
+        iconAnchor: [14, 28],
+        popupAnchor: [0, -28],
+      });
+
+      // Marcador de usuario
+      let userMarker;
+      let businessMarkers = [];
+
+      // Función para cargar negocios desde Firestore
+      function loadBusinesses(center = null, radiusKm = 5) {
+        // Limpiar marcadores existentes
+        businessMarkers.forEach((marker) => map.removeLayer(marker));
+        businessMarkers = [];
+
+        const negociosRef = db
+          .collection("ubicate")
+          .doc("negocios")
+          .collection("registros");
+
+        negociosRef
+          .get()
+          .then((querySnapshot) => {
+            const businesses = [];
+
+            querySnapshot.forEach((doc) => {
+              const business = doc.data();
+              business.id = doc.id;
+
+              // Filtrar por distancia si hay un centro
+              if (center) {
+                const businessLatLng = L.latLng(
+                  business.ubicacion.latitude,
+                  business.ubicacion.longitude
+                );
+                const distance = center.distanceTo(businessLatLng) / 1000;
+                if (distance > radiusKm) return;
+              }
+
+              businesses.push(business);
+              addBusinessMarker(business);
+            });
+
+            updateBusinessList(businesses);
+          })
+          .catch((error) => {
+            console.error("Error al cargar negocios:", error);
+            alert("Error al cargar negocios. Por favor recarga la página.");
+          });
+      }
+
+      // Función para añadir marcadores al mapa
+      function addBusinessMarker(business) {
+        if (!business.ubicacion) {
+          console.warn("Negocio sin ubicación:", business);
+          return;
+        }
+
+        const marker = L.marker(
+          [business.ubicacion.latitude, business.ubicacion.longitude],
+          { icon: businessIcon }
+        ).addTo(map);
+
+        // Popup con información del negocio
+        marker.bindPopup(`
                 <div class="popup-title">${business.nombre}</div>
-                <div class="popup-info"><i class="bi bi-telephone"></i> ${business.telefono
-        }</div>
-                <div class="popup-info"><i class="bi bi-clock"></i> ${business.horario || "No especificado"
-        }</div>
-                <div class="popup-info"><i class="bi bi-tag"></i> ${business.categoria
-        }</div>
+                <div class="popup-info"><i class="bi bi-telephone"></i> ${
+                  business.telefono
+                }</div>
+                <div class="popup-info"><i class="bi bi-clock"></i> ${
+                  business.horario || "No especificado"
+                }</div>
+                <div class="popup-info"><i class="bi bi-tag"></i> ${
+                  business.categoria
+                }</div>
             `);
 
-      businessMarkers.push(marker);
-    }
+        businessMarkers.push(marker);
+      }
 
-    // Función para actualizar la lista de negocios
-    function updateBusinessList(businesses) {
-      const businessList = document.getElementById("business-list");
-      businessList.innerHTML = "";
+      // Función para actualizar la lista de negocios
+      function updateBusinessList(businesses) {
+        const businessList = document.getElementById("business-list");
+        businessList.innerHTML = "";
 
-      if (businesses.length === 0) {
-        businessList.innerHTML = `
+        if (businesses.length === 0) {
+          businessList.innerHTML = `
                     <div class="alert alert-info">
                         No se encontraron negocios cercanos. Sé el primero en registrar uno.
                     </div>
                 `;
-        return;
-      }
+          return;
+        }
 
-      businesses.forEach((business) => {
-        const card = document.createElement("div");
-        card.className = "business-card";
-        card.innerHTML = `
+        businesses.forEach((business) => {
+          const card = document.createElement("div");
+          card.className = "business-card";
+          card.innerHTML = `
                     <h5>${business.nombre}</h5>
                     <p><i class="bi bi-telephone"></i> ${business.telefono}</p>
-                    <p><i class="bi bi-clock"></i> ${business.horario || "No especificado"
-          }</p>
-                    <p class="text-muted"><small>${business.categoria
-          }</small></p>
-                    <button onclick="focusBusiness('${business.id
-          }')" class="btn btn-sm btn-outline-primary">
+                    <p><i class="bi bi-clock"></i> ${
+                      business.horario || "No especificado"
+                    }</p>
+                    <p class="text-muted"><small>${
+                      business.categoria
+                    }</small></p>
+                    <button onclick="focusBusiness('${
+                      business.id
+                    }')" class="btn btn-sm btn-outline-primary">
                         <i class="bi bi-geo-alt"></i> Ver en mapa
                     </button>
                 `;
-        businessList.appendChild(card);
-      });
-    }
+          businessList.appendChild(card);
+        });
+      }
 
-    // Función para centrar el mapa en un negocio específico y hacer scroll al mapa
-    function focusBusiness(businessId) {
+      // Función para centrar el mapa en un negocio específico y hacer scroll al mapa
+      function focusBusiness(businessId) {
+        db.collection("ubicate")
+          .doc("negocios")
+          .collection("registros")
+          .doc(businessId)
+          .get()
+          .then((doc) => {
+            if (doc.exists) {
+              const business = doc.data();
+              map.setView(
+                [business.ubicacion.latitude, business.ubicacion.longitude],
+                16
+              );
+
+              // Abrir popup del marcador
+              const marker = businessMarkers.find(
+                (m) =>
+                  m.getLatLng().lat === business.ubicacion.latitude &&
+                  m.getLatLng().lng === business.ubicacion.longitude
+              );
+              if (marker) marker.openPopup();
+
+              // Hacer scroll suave hasta el mapa
+              const mapElement = document.getElementById("map");
+              mapElement.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+          });
+      }
+
+      // Escuchar nuevos negocios en tiempo real
       db.collection("ubicate")
         .doc("negocios")
         .collection("registros")
-        .doc(businessId)
-        .get()
-        .then((doc) => {
-          if (doc.exists) {
-            const business = doc.data();
-            map.setView(
-              [business.ubicacion.latitude, business.ubicacion.longitude],
-              16
-            );
-
-            // Abrir popup del marcador
-            const marker = businessMarkers.find(
-              (m) =>
-                m.getLatLng().lat === business.ubicacion.latitude &&
-                m.getLatLng().lng === business.ubicacion.longitude
-            );
-            if (marker) marker.openPopup();
-
-            // Hacer scroll suave hasta el mapa
-            const mapElement = document.getElementById('map');
-            mapElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }
+        .onSnapshot((snapshot) => {
+          snapshot.docChanges().forEach((change) => {
+            if (change.type === "added") {
+              const business = change.doc.data();
+              business.id = change.doc.id;
+              addBusinessMarker(business);
+              updateBusinessList([business]);
+            }
+          });
         });
-    }
 
-    // Escuchar nuevos negocios en tiempo real
-    db.collection("ubicate")
-      .doc("negocios")
-      .collection("registros")
-      .onSnapshot((snapshot) => {
-        snapshot.docChanges().forEach((change) => {
-          if (change.type === "added") {
-            const business = change.doc.data();
-            business.id = change.doc.id;
-            addBusinessMarker(business);
-            updateBusinessList([business]);
+      // Obtener ubicación del usuario
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const userLatLng = L.latLng(
+              position.coords.latitude,
+              position.coords.longitude
+            );
+            map.setView(userLatLng, 15);
+
+            // Marcador de usuario
+            userMarker = L.marker(userLatLng, {
+              icon: userIcon,
+              zIndexOffset: 1000,
+            })
+              .addTo(map)
+              .bindPopup("<b>Tu ubicación</b>");
+
+            // Cargar negocios cercanos
+            loadBusinesses(userLatLng);
+          },
+          (error) => {
+            console.warn("No se pudo obtener ubicación:", error.message);
+            // Cargar todos los negocios si no hay geolocalización
+            loadBusinesses();
           }
-        });
-      });
-
-    // Obtener ubicación del usuario
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const userLatLng = L.latLng(
-            position.coords.latitude,
-            position.coords.longitude
-          );
-          map.setView(userLatLng, 15);
-
-          // Marcador de usuario
-          userMarker = L.marker(userLatLng, {
-            icon: userIcon,
-            zIndexOffset: 1000,
-          })
-            .addTo(map)
-            .bindPopup("<b>Tu ubicación</b>");
-
-          // Cargar negocios cercanos
-          loadBusinesses(userLatLng);
-        },
-        (error) => {
-          console.warn("No se pudo obtener ubicación:", error.message);
-          // Cargar todos los negocios si no hay geolocalización
-          loadBusinesses();
-        }
-      );
-    } else {
-      loadBusinesses();
-    }
-
-    // Buscar dirección
-    function buscarDireccion() {
-      const input = document.getElementById("direccion").value.trim();
-      if (!input) {
-        alert("Por favor, escribe una dirección para buscar.");
-        return;
+        );
+      } else {
+        loadBusinesses();
       }
 
-      const btnBuscar = document.querySelector(".search-btn");
-      btnBuscar.innerHTML =
-        '<span class="spinner-border spinner-border-sm"></span> Buscando...';
-      btnBuscar.disabled = true;
-
-      fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-          input
-        )}`
-      )
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.length === 0) {
-            alert("No se encontraron resultados para tu búsqueda.");
-            return;
-          }
-
-          const lugar = data[0];
-          const lat = parseFloat(lugar.lat);
-          const lon = parseFloat(lugar.lon);
-          const newLatLng = L.latLng(lat, lon);
-
-          map.setView(newLatLng, 15);
-          loadBusinesses(newLatLng);
-        })
-        .catch((err) => {
-          console.error("Error al buscar dirección:", err);
-          alert("Error al buscar la dirección. Intenta nuevamente.");
-        })
-        .finally(() => {
-          btnBuscar.innerHTML = "Buscar";
-          btnBuscar.disabled = false;
-        });
-    }
-
-    // Manejar el botón de búsqueda al presionar Enter
-    document
-      .getElementById("direccion")
-      .addEventListener("keypress", function (e) {
-        if (e.key === "Enter") {
-          buscarDireccion();
+      // Buscar dirección
+      function buscarDireccion() {
+        const input = document.getElementById("direccion").value.trim();
+        if (!input) {
+          alert("Por favor, escribe una dirección para buscar.");
+          return;
         }
-      });
 
-    // Botón para centrar en ubicación actual
-    document
-      .addEventListener("click", function () {
+        const btnBuscar = document.querySelector(".search-btn");
+        btnBuscar.innerHTML =
+          '<span class="spinner-border spinner-border-sm"></span> Buscando...';
+        btnBuscar.disabled = true;
+
+        fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+            input
+          )}`
+        )
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.length === 0) {
+              alert("No se encontraron resultados para tu búsqueda.");
+              return;
+            }
+
+            const lugar = data[0];
+            const lat = parseFloat(lugar.lat);
+            const lon = parseFloat(lugar.lon);
+            const newLatLng = L.latLng(lat, lon);
+
+            map.setView(newLatLng, 15);
+            loadBusinesses(newLatLng);
+          })
+          .catch((err) => {
+            console.error("Error al buscar dirección:", err);
+            alert("Error al buscar la dirección. Intenta nuevamente.");
+          })
+          .finally(() => {
+            btnBuscar.innerHTML = "Buscar";
+            btnBuscar.disabled = false;
+          });
+      }
+
+      // Manejar el botón de búsqueda al presionar Enter
+      document
+        .getElementById("direccion")
+        .addEventListener("keypress", function (e) {
+          if (e.key === "Enter") {
+            buscarDireccion();
+          }
+        });
+
+      // Botón para centrar en ubicación actual
+      document.addEventListener("click", function () {
         if (navigator.geolocation) {
           navigator.geolocation.getCurrentPosition(
             (position) => {
@@ -589,40 +614,37 @@
         }
       });
 
+      function toggleDropdown() {
+        document.getElementById("myDropdown").classList.toggle("show");
+      }
 
+      function cerrarSesion() {
+        firebase
+          .auth()
+          .signOut()
+          .then(() => {
+            // Redirigir a la página de inicio o login
+            window.location.href = "index.html";
+          })
+          .catch((error) => {
+            // Ocurrió un error al cerrar la sesión
+            console.error("Error al cerrar sesión:", error);
+            alert("Error al cerrar sesión. Intenta de nuevo.");
+          });
+      }
 
-    function toggleDropdown() {
-      document.getElementById("myDropdown").classList.toggle("show");
-    }
-
-    function cerrarSesion() {
-      firebase
-        .auth()
-        .signOut()
-        .then(() => {
-          // Redirigir a la página de inicio o login
-          window.location.href = "index.html"; // Cambia "index.html" a la página que corresponda
-        })
-        .catch((error) => {
-          // Ocurrió un error al cerrar la sesión
-          console.error("Error al cerrar sesión:", error);
-          alert("Error al cerrar sesión. Intenta de nuevo.");
-        });
-    }
-
-    // Cierra el menú si el usuario hace clic fuera de él
-    window.onclick = function (event) {
-      if (!event.target.matches(".dropdown-toggle")) {
-        var dropdowns = document.getElementsByClassName("dropdown-content");
-        for (var i = 0; i < dropdowns.length; i++) {
-          var openDropdown = dropdowns[i];
-          if (openDropdown.classList.contains("show")) {
-            openDropdown.classList.remove("show");
+      // Cierra el menú si el usuario hace clic fuera de él
+      window.onclick = function (event) {
+        if (!event.target.matches(".dropdown-toggle")) {
+          var dropdowns = document.getElementsByClassName("dropdown-content");
+          for (var i = 0; i < dropdowns.length; i++) {
+            var openDropdown = dropdowns[i];
+            if (openDropdown.classList.contains("show")) {
+              openDropdown.classList.remove("show");
+            }
           }
         }
-      }
-    };
-  </script>
-</body>
-
+      };
+    </script>
+  </body>
 </html>

@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <title>Editar Perfil - Ubicate</title>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
+
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+    />
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+      import {
+        getAuth,
+        onAuthStateChanged,
+        updateProfile,
+        updateEmail,
+        updatePassword,
+        signInAnonymously,
+        reauthenticateWithCredential,
+        EmailAuthProvider,
+      } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+      import {
+        getFirestore,
+        doc,
+        getDoc,
+        setDoc,
+        collection,
+        query,
+        where,
+        getDocs,
+      } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyBm6n7ZqAPl_QaYSVE8nsJ9fKMUCGIgsfs",
+        authDomain: "ubicate-d4856.firebaseapp.com",
+        projectId: "ubicate-d4856",
+        storageBucket: "ubicate-d4856.firebasestorage.app",
+        messagingSenderId: "1049935204935",
+        appId: "1:1049935204935:web:5397f73293ca15f3bad762",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+
+      // Variables globales
+      let currentUser = null;
+      let userData = {};
+      let isEditing = false;
+
+      // Cargar datos del usuario
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          currentUser = user;
+          try {
+            // Intentar obtener datos de la colección "users"
+            const userDocRef = doc(db, "users", user.uid);
+            const userDoc = await getDoc(userDocRef);
+
+            if (userDoc.exists()) {
+              userData = userDoc.data();
+            } else {
+              // Si no existe en "users", buscar en la colección de negocios
+              const negociosQuery = query(
+                collection(db, "ubicate", "negocios", "registros"),
+                where("usuarioId", "==", user.uid)
+              );
+
+              const querySnapshot = await getDocs(negociosQuery);
+
+              if (!querySnapshot.empty) {
+                const firstDoc = querySnapshot.docs[0];
+                userData = firstDoc.data();
+              }
+            }
+
+            displayUserForm(user, userData);
+          } catch (error) {
+            console.error("Error obteniendo datos del usuario:", error);
+            displayUserForm(user, {});
+          }
+        } else {
+          try {
+            await signInAnonymously(auth);
+          } catch (error) {
+            console.error("Error en autenticación:", error);
+            window.location.href = "login.html";
+          }
+        }
+      });
+
+      // Mostrar formulario con datos del usuario
+      function displayUserForm(user, data) {
+        const formContainer = document.getElementById("edit-profile-form");
+        const isAnonymous = user.isAnonymous;
+
+        formContainer.innerHTML = `
+          <form id="profile-form">
+            <div class="mb-3">
+              <label for="nombre" class="form-label">Nombre completo</label>
+              <input 
+                type="text" 
+                class="form-control" 
+                id="nombre" 
+                value="${data.nombre || user.displayName || ""}" 
+                ${isAnonymous ? "disabled" : ""}
+              >
+              ${
+                isAnonymous
+                  ? '<div class="form-text text-warning">Los usuarios invitados no pueden editar su nombre. <a href="registro.html">Regístrate</a> para acceder a esta función.</div>'
+                  : ""
+              }
+            </div>
+            
+            <div class="mb-3">
+              <label for="email" class="form-label">Correo electrónico</label>
+              <input 
+                type="email" 
+                class="form-control" 
+                id="email" 
+                value="${user.email || data.email || ""}" 
+                ${isAnonymous ? "disabled" : ""}
+              >
+              ${
+                isAnonymous
+                  ? '<div class="form-text text-warning">Los usuarios invitados no pueden editar su email. <a href="registro.html">Regístrate</a> para acceder a esta función.</div>'
+                  : ""
+              }
+            </div>
+            
+            <div class="mb-3">
+              <label for="telefono" class="form-label">Teléfono</label>
+              <input 
+                type="tel" 
+                class="form-control" 
+                id="telefono" 
+                value="${data.telefono || data.phoneNumber || ""}"
+              >
+            </div>
+            
+            <div class="mb-3">
+              <label for="direccion" class="form-label">Dirección</label>
+              <textarea 
+                class="form-control" 
+                id="direccion" 
+                rows="2"
+              >${data.direccion || ""}</textarea>
+            </div>
+            
+            <div class="mb-3">
+              <label for="empresa" class="form-label">Empresa</label>
+              <input 
+                type="text" 
+                class="form-control" 
+                id="empresa" 
+                value="${data.empresa || ""}"
+              >
+            </div>
+            
+            <div class="mb-3">
+              <label for="cargo" class="form-label">Cargo/Posición</label>
+              <input 
+                type="text" 
+                class="form-control" 
+                id="cargo" 
+                value="${data.cargo || ""}"
+              >
+            </div>
+            
+            <div class="accordion mb-4" id="passwordAccordion">
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#passwordCollapse" aria-expanded="false" aria-controls="passwordCollapse">
+                    Cambiar contraseña
+                  </button>
+                </h2>
+                <div id="passwordCollapse" class="accordion-collapse collapse" data-bs-parent="#passwordAccordion">
+                  <div class="accordion-body">
+                    <div class="mb-3">
+                      <label for="currentPassword" class="form-label">Contraseña actual</label>
+                      <input type="password" class="form-control" id="currentPassword">
+                    </div>
+                    <div class="mb-3">
+                      <label for="newPassword" class="form-label">Nueva contraseña</label>
+                      <input type="password" class="form-control" id="newPassword">
+                      <div class="form-text">La contraseña debe tener al menos 6 caracteres.</div>
+                    </div>
+                    <div class="mb-3">
+                      <label for="confirmPassword" class="form-label">Confirmar nueva contraseña</label>
+                      <input type="password" class="form-control" id="confirmPassword">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+              <button type="button" class="btn btn-secondary me-md-2" id="cancel-btn">Cancelar</button>
+              <button type="submit" class="btn btn-primary" id="save-btn">Guardar cambios</button>
+            </div>
+          </form>
+        `;
+
+        // Configurar eventos del formulario
+        document
+          .getElementById("profile-form")
+          .addEventListener("submit", handleFormSubmit);
+        document.getElementById("cancel-btn").addEventListener("click", () => {
+          window.location.href = "usuario.html";
+        });
+
+        // Mostrar alerta si es usuario anónimo
+        if (isAnonymous) {
+          const anonymousAlert = document.createElement("div");
+          anonymousAlert.className = "alert alert-warning mt-3";
+          anonymousAlert.innerHTML = `
+            <i class="bi bi-exclamation-triangle"></i> 
+            Eres un usuario invitado. Algunas funciones están limitadas. 
+            <a href="registro.html" class="alert-link">Regístrate</a> para acceder a todas las funciones.
+          `;
+          formContainer.appendChild(anonymousAlert);
+        }
+
+        // Ocultar spinner y mostrar formulario
+        document.getElementById("loading-spinner").style.display = "none";
+        formContainer.style.display = "block";
+      }
+
+      // Manejar envío del formulario
+      async function handleFormSubmit(e) {
+        e.preventDefault();
+
+        const saveBtn = document.getElementById("save-btn");
+        const originalText = saveBtn.innerHTML;
+        saveBtn.innerHTML =
+          '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
+        saveBtn.disabled = true;
+
+        try {
+          // Obtener datos del formulario
+          const formData = {
+            nombre: document.getElementById("nombre").value,
+            email: document.getElementById("email").value,
+            telefono: document.getElementById("telefono").value,
+            direccion: document.getElementById("direccion").value,
+            empresa: document.getElementById("empresa").value,
+            cargo: document.getElementById("cargo").value,
+            fechaActualizacion: new Date(),
+          };
+
+          // Verificar si es usuario anónimo
+          const isAnonymous = currentUser.isAnonymous;
+
+          // Actualizar perfil de autenticación (solo para usuarios registrados)
+          if (!isAnonymous) {
+            // Actualizar nombre de perfil
+            if (
+              formData.nombre &&
+              formData.nombre !== currentUser.displayName
+            ) {
+              await updateProfile(currentUser, {
+                displayName: formData.nombre,
+              });
+            }
+
+            // Actualizar email si ha cambiado
+            if (formData.email && formData.email !== currentUser.email) {
+              await updateEmail(currentUser, formData.email);
+            }
+          }
+
+          // Actualizar contraseña si se proporcionó
+          const currentPassword =
+            document.getElementById("currentPassword").value;
+          const newPassword = document.getElementById("newPassword").value;
+          const confirmPassword =
+            document.getElementById("confirmPassword").value;
+
+          if (newPassword) {
+            if (newPassword !== confirmPassword) {
+              throw new Error("Las contraseñas no coinciden");
+            }
+
+            if (newPassword.length < 6) {
+              throw new Error("La contraseña debe tener al menos 6 caracteres");
+            }
+
+            if (!isAnonymous) {
+              if (!currentPassword) {
+                throw new Error(
+                  "Debe proporcionar la contraseña actual para cambiarla"
+                );
+              }
+
+              // Reautenticar usuario
+              const credential = EmailAuthProvider.credential(
+                currentUser.email,
+                currentPassword
+              );
+
+              await reauthenticateWithCredential(currentUser, credential);
+              await updatePassword(currentUser, newPassword);
+            }
+          }
+
+          // Guardar datos adicionales en Firestore
+          const userDocRef = doc(db, "users", currentUser.uid);
+          await setDoc(userDocRef, formData, { merge: true });
+
+          // Mostrar mensaje de éxito
+          showAlert("Perfil actualizado correctamente", "success");
+
+          // Redirigir después de 2 segundos
+          setTimeout(() => {
+            window.location.href = "usuario.html";
+          }, 2000);
+        } catch (error) {
+          console.error("Error al actualizar perfil:", error);
+          showAlert(`Error: ${error.message}`, "danger");
+        } finally {
+          saveBtn.innerHTML = originalText;
+          saveBtn.disabled = false;
+        }
+      }
+
+      // Mostrar alerta
+      function showAlert(message, type) {
+        const alertDiv = document.createElement("div");
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show mt-3`;
+        alertDiv.innerHTML = `
+          ${message}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+
+        const formContainer = document.getElementById("edit-profile-form");
+        formContainer.insertBefore(alertDiv, formContainer.firstChild);
+
+        // Auto-ocultar después de 5 segundos
+        setTimeout(() => {
+          if (alertDiv.parentNode) {
+            alertDiv.remove();
+          }
+        }, 5000);
+      }
+
+      window.auth = auth;
+      window.db = db;
+    </script>
+
+    <style>
+      .back-button {
+        position: fixed;
+        top: 20px;
+        left: 15px;
+        z-index: 1000;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+      }
+
+      .back-button:hover {
+        transform: scale(1.1);
+        background-color: white;
+      }
+
+      .user-avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin: 0 auto;
+        display: block;
+        border: 3px solid #0d6efd;
+        box-shadow: 0 4px 10px rgba(13, 110, 253, 0.3);
+      }
+
+      .profile-card {
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        margin-top: 20px;
+        border: none;
+      }
+
+      .loading-spinner {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 200px;
+      }
+
+      .accordion-button:not(.collapsed) {
+        background-color: #e7f1ff;
+        color: #0d6efd;
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          padding-top: 30px;
+        }
+
+        h1 {
+          font-size: 1.8rem;
+          text-align: center;
+        }
+
+        .lead {
+          text-align: center;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <a href="usuario.html" class="back-button">
+      <i class="bi bi-arrow-left" style="font-size: 1.2rem"></i>
+    </a>
+
+    <div class="container mt-4">
+      <h1 class="mt-5 pt-3">Editar Perfil</h1>
+      <p class="lead">Actualiza tu información personal y de contacto.</p>
+
+      <div class="row mt-4 justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+          <div class="card profile-card">
+            <div class="card-body p-4">
+              <img
+                id="user-avatar"
+                src="https://ui-avatars.com/api/?name=Usuario&size=100&background=007bff&color=fff"
+                alt="Avatar"
+                class="user-avatar mb-3"
+              />
+
+              <h2 class="text-center mb-4">Información del Perfil</h2>
+
+              <div id="loading-spinner" class="loading-spinner">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Cargando información...</span>
+                </div>
+              </div>
+
+              <div id="edit-profile-form" style="display: none"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="mt-5 py-4">
+      <div class="container text-center">
+        <p>&copy; 2023 Ubicate - Todos los derechos reservados</p>
+      </div>
+    </footer>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+      integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+      crossorigin="anonymous"
+    ></script>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
+      integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>
