@@ -201,7 +201,6 @@
         position: absolute;
         top: 50px;
         right: 0;
-        /* Alineado a la izquierda */
         background-color: #fff;
         width: 150px;
         border-radius: 12px;
@@ -224,6 +223,30 @@
 
       .show {
         display: block;
+      }
+
+      .legend {
+        background: white;
+        padding: 10px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        z-index: 1000;
+        font-size: 12px;
+      }
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 5px;
+      }
+
+      .legend-icon {
+        width: 20px;
+        height: 20px;
+        margin-right: 5px;
       }
     </style>
   </head>
@@ -314,6 +337,7 @@
           }
         }
       };
+
       // Configuración Firebase
       const firebaseConfig = {
         apiKey: "AIzaSyBm6n7ZqAPl_QaYSVE8nsJ9fKMUCGIgsfs",
@@ -330,7 +354,7 @@
       const auth = firebase.auth();
 
       // Inicializar mapa
-      const map = L.map("map").setView([13.6929, -89.2182], 13); // Coordenadas iniciales (El Salvador)
+      const map = L.map("map").setView([13.6929, -89.2182], 13);
 
       // Capa de OpenStreetMap
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -339,19 +363,58 @@
         maxZoom: 19,
       }).addTo(map);
 
-      // Iconos personalizados
+      // Iconos personalizados por categoría
+      const categoryIcons = {
+        restaurante: L.icon({
+          iconUrl: "restaurante.png",
+          iconSize: [32, 32],
+          iconAnchor: [16, 32],
+          popupAnchor: [0, -32],
+        }),
+        tienda: L.icon({
+          iconUrl: "tienda.png",
+          iconSize: [32, 32],
+          iconAnchor: [16, 32],
+          popupAnchor: [0, -32],
+        }),
+        servicio: L.icon({
+          iconUrl: "servicio.png",
+          iconSize: [32, 32],
+          iconAnchor: [16, 32],
+          popupAnchor: [0, -32],
+        }),
+        hotel: L.icon({
+          iconUrl: "hotel.png",
+          iconSize: [32, 32],
+          iconAnchor: [16, 32],
+          popupAnchor: [0, -32],
+        }),
+        entretenimiento: L.icon({
+          iconUrl: "entretenimiento.png",
+          iconSize: [32, 32],
+          iconAnchor: [16, 32],
+          popupAnchor: [0, -32],
+        }),
+        default: L.icon({
+          iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
+          iconSize: [32, 32],
+          iconAnchor: [16, 32],
+          popupAnchor: [0, -32],
+        }),
+      };
+
+      // Icono del usuario
       const userIcon = L.icon({
         iconUrl: "src/assets/ubicacion.png",
         iconSize: [32, 32],
         iconAnchor: [16, 32],
       });
 
-      const businessIcon = L.icon({
-        iconUrl: "https://cdn-icons-png.flaticon.com/512/284/284489.png",
-        iconSize: [28, 28],
-        iconAnchor: [14, 28],
-        popupAnchor: [0, -28],
-      });
+      // Función para obtener el icono según la categoría
+      function getCategoryIcon(categoria) {
+        if (!categoria) return categoryIcons.default;
+        return categoryIcons[categoria] || categoryIcons.default;
+      }
 
       // Marcador de usuario
       let userMarker;
@@ -377,14 +440,24 @@
               const business = doc.data();
               business.id = doc.id;
 
+              // Verificar que tenga ubicación válida
+              if (!business.ubicacion) {
+                console.warn("Negocio sin ubicación:", business.nombre);
+                return;
+              }
+
               // Filtrar por distancia si hay un centro
               if (center) {
-                const businessLatLng = L.latLng(
-                  business.ubicacion.latitude,
-                  business.ubicacion.longitude
-                );
-                const distance = center.distanceTo(businessLatLng) / 1000;
-                if (distance > radiusKm) return;
+                try {
+                  const businessLatLng = L.latLng(
+                    business.ubicacion.latitude,
+                    business.ubicacion.longitude
+                  );
+                  const distance = center.distanceTo(businessLatLng) / 1000;
+                  if (distance > radiusKm) return;
+                } catch (error) {
+                  console.error("Error calculando distancia:", error);
+                }
               }
 
               businesses.push(business);
@@ -399,33 +472,49 @@
           });
       }
 
-      // Función para añadir marcadores al mapa
+      // Función para añadir marcadores al mapa con iconos según categoría
       function addBusinessMarker(business) {
-        if (!business.ubicacion) {
-          console.warn("Negocio sin ubicación:", business);
-          return;
+        try {
+          if (
+            !business.ubicacion ||
+            !business.ubicacion.latitude ||
+            !business.ubicacion.longitude
+          ) {
+            console.warn("Negocio sin ubicación válida:", business.nombre);
+            return;
+          }
+
+          // Obtener el icono según la categoría
+          const icon = getCategoryIcon(business.categoria);
+
+          const marker = L.marker(
+            [business.ubicacion.latitude, business.ubicacion.longitude],
+            { icon: icon }
+          ).addTo(map);
+
+          // Popup con información del negocio
+          marker.bindPopup(`
+            <div class="popup-title">${business.nombre || "Sin nombre"}</div>
+            <div class="popup-info"><i class="bi bi-tag"></i> ${
+              business.categoria || "No especificado"
+            }</div>
+            <div class="popup-info"><i class="bi bi-telephone"></i> ${
+              business.telefono || "No especificado"
+            }</div>
+            <div class="popup-info"><i class="bi bi-clock"></i> ${
+              business.horario || "No especificado"
+            }</div>
+            ${
+              business.descripcion
+                ? `<div class="popup-info"><i class="bi bi-info-circle"></i> ${business.descripcion}</div>`
+                : ""
+            }
+          `);
+
+          businessMarkers.push(marker);
+        } catch (error) {
+          console.error("Error añadiendo marcador:", error, business);
         }
-
-        const marker = L.marker(
-          [business.ubicacion.latitude, business.ubicacion.longitude],
-          { icon: businessIcon }
-        ).addTo(map);
-
-        // Popup con información del negocio
-        marker.bindPopup(`
-                <div class="popup-title">${business.nombre}</div>
-                <div class="popup-info"><i class="bi bi-telephone"></i> ${
-                  business.telefono
-                }</div>
-                <div class="popup-info"><i class="bi bi-clock"></i> ${
-                  business.horario || "No especificado"
-                }</div>
-                <div class="popup-info"><i class="bi bi-tag"></i> ${
-                  business.categoria
-                }</div>
-            `);
-
-        businessMarkers.push(marker);
       }
 
       // Función para actualizar la lista de negocios
@@ -435,10 +524,10 @@
 
         if (businesses.length === 0) {
           businessList.innerHTML = `
-                    <div class="alert alert-info">
-                        No se encontraron negocios cercanos. Sé el primero en registrar uno.
-                    </div>
-                `;
+            <div class="alert alert-info">
+              No se encontraron negocios cercanos. Sé el primero en registrar uno.
+            </div>
+          `;
           return;
         }
 
@@ -446,25 +535,28 @@
           const card = document.createElement("div");
           card.className = "business-card";
           card.innerHTML = `
-                    <h5>${business.nombre}</h5>
-                    <p><i class="bi bi-telephone"></i> ${business.telefono}</p>
-                    <p><i class="bi bi-clock"></i> ${
-                      business.horario || "No especificado"
-                    }</p>
-                    <p class="text-muted"><small>${
-                      business.categoria
-                    }</small></p>
-                    <button onclick="focusBusiness('${
-                      business.id
-                    }')" class="btn btn-sm btn-outline-primary">
-                        <i class="bi bi-geo-alt"></i> Ver en mapa
-                    </button>
-                `;
+            <h5>${business.nombre}</h5>
+            <p><i class="bi bi-tag"></i> ${business.categoria}</p>
+            <p><i class="bi bi-telephone"></i> ${business.telefono}</p>
+            <p><i class="bi bi-clock"></i> ${
+              business.horario || "No especificado"
+            }</p>
+            ${
+              business.descripcion
+                ? `<p><i class="bi bi-info-circle"></i> ${business.descripcion}</p>`
+                : ""
+            }
+            <button onclick="focusBusiness('${
+              business.id
+            }')" class="btn btn-sm btn-outline-primary">
+              <i class="bi bi-geo-alt"></i> Ver en mapa
+            </button>
+          `;
           businessList.appendChild(card);
         });
       }
 
-      // Función para centrar el mapa en un negocio específico y hacer scroll al mapa
+      // Función para centrar el mapa en un negocio específico
       function focusBusiness(businessId) {
         db.collection("ubicate")
           .doc("negocios")
@@ -593,58 +685,41 @@
         });
 
       // Botón para centrar en ubicación actual
-      document.addEventListener("click", function () {
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(
-            (position) => {
-              const userLatLng = L.latLng(
-                position.coords.latitude,
-                position.coords.longitude
-              );
-              map.setView(userLatLng, 15);
-              loadBusinesses(userLatLng);
-            },
-            (error) => {
-              console.error("Error al obtener ubicación:", error);
-              alert("No se pudo obtener tu ubicación actual.");
-            }
-          );
-        } else {
-          alert("Tu navegador no soporta geolocalización.");
-        }
-      });
-
-      function toggleDropdown() {
-        document.getElementById("myDropdown").classList.toggle("show");
-      }
+      document
+        .getElementById("btnFavoritos")
+        .addEventListener("click", function () {
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+              (position) => {
+                const userLatLng = L.latLng(
+                  position.coords.latitude,
+                  position.coords.longitude
+                );
+                map.setView(userLatLng, 15);
+                loadBusinesses(userLatLng);
+              },
+              (error) => {
+                console.error("Error al obtener ubicación:", error);
+                alert("No se pudo obtener tu ubicación actual.");
+              }
+            );
+          } else {
+            alert("Tu navegador no soporta geolocalización.");
+          }
+        });
 
       function cerrarSesion() {
         firebase
           .auth()
           .signOut()
           .then(() => {
-            // Redirigir a la página de inicio o login
             window.location.href = "index.html";
           })
           .catch((error) => {
-            // Ocurrió un error al cerrar la sesión
             console.error("Error al cerrar sesión:", error);
             alert("Error al cerrar sesión. Intenta de nuevo.");
           });
       }
-
-      // Cierra el menú si el usuario hace clic fuera de él
-      window.onclick = function (event) {
-        if (!event.target.matches(".dropdown-toggle")) {
-          var dropdowns = document.getElementsByClassName("dropdown-content");
-          for (var i = 0; i < dropdowns.length; i++) {
-            var openDropdown = dropdowns[i];
-            if (openDropdown.classList.contains("show")) {
-              openDropdown.classList.remove("show");
-            }
-          }
-        }
-      };
     </script>
   </body>
 </html>
