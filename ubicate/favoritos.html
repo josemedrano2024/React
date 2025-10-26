@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mis Favoritos - Úbicate</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+    />
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f8f9fa;
+        margin: 0;
+        padding: 0;
+      }
+
+      .navbar-custom {
+        background-color: #4285f4;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        padding: 10px 0;
+      }
+
+      .navbar-title {
+        color: white;
+        font-weight: 600;
+        font-size: 1.2rem;
+        text-align: center;
+      }
+
+      .logo-img {
+        height: 40px;
+      }
+
+      .favoritos-container {
+        max-width: 800px;
+        margin: 30px auto;
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .business-card {
+        margin-bottom: 20px;
+        padding: 20px;
+        border-radius: 10px;
+        background: #fff;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        border-left: 4px solid #4285f4;
+        transition: transform 0.2s;
+      }
+
+      .business-card:hover {
+        transform: translateY(-2px);
+      }
+
+      .business-card h5 {
+        color: #4285f4;
+        margin-bottom: 10px;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 50px 20px;
+        color: #6c757d;
+      }
+
+      .empty-state i {
+        font-size: 48px;
+        margin-bottom: 20px;
+        color: #dee2e6;
+      }
+
+      .btn-remove {
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-left: 10px;
+      }
+
+      .btn-view-map {
+        background: #4285f4;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      .btn-volver {
+        background: white;
+        color: #4285f4;
+        border: 1px solid #4285f4;
+        padding: 8px 15px;
+        border-radius: 5px;
+        text-decoration: none;
+        display: inline-block;
+      }
+
+      .btn-volver:hover {
+        background: #4285f4;
+        color: white;
+      }
+
+      .action-buttons {
+        margin-top: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light navbar-custom">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="principal.html">
+          <img src="src/assets/Logo.jpeg" alt="Logo" class="logo-img" />
+        </a>
+        <div class="navbar-title">Mis Favoritos</div>
+        <a href="principal.html" class="btn-volver">
+          <i class="bi bi-arrow-left"></i> Volver al Mapa
+        </a>
+      </div>
+    </nav>
+
+    <div class="favoritos-container">
+      <h2>
+        <i class="bi bi-heart-fill text-danger"></i> Mis Negocios Favoritos
+      </h2>
+      <p class="text-muted">
+        Aquí encontrarás todos los negocios que has marcado como favoritos.
+      </p>
+
+      <div id="favoritos-list">
+        <div class="text-center">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+          </div>
+          <p>Cargando favoritos...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+
+    <script>
+      // Configuración Firebase
+      const firebaseConfig = {
+        apiKey: "AIzaSyBm6n7ZqAPl_QaYSVE8nsJ9fKMUCGIgsfs",
+        authDomain: "ubicate-d4856.firebaseapp.com",
+        projectId: "ubicate-d4856",
+        storageBucket: "ubicate-d4856.appspot.com",
+        messagingSenderId: "1049935204935",
+        appId: "1:1049935204935:web:5397f73293ca15f3bad762",
+      };
+
+      // Inicializar Firebase
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+      const auth = firebase.auth();
+
+      // Cargar favoritos
+      function cargarFavoritos() {
+        const favoritosList = document.getElementById("favoritos-list");
+
+        // Esperar a que Firebase esté listo
+        auth.onAuthStateChanged((user) => {
+          if (user) {
+            cargarFavoritosDelUsuario(user.uid);
+          } else {
+            // Si no hay usuario, crear uno anónimo
+            auth
+              .signInAnonymously()
+              .then((userCredential) => {
+                cargarFavoritosDelUsuario(userCredential.user.uid);
+              })
+              .catch((error) => {
+                console.error("Error en autenticación:", error);
+                mostrarError("Error al cargar favoritos");
+              });
+          }
+        });
+
+        function cargarFavoritosDelUsuario(userId) {
+          console.log("Cargando favoritos para usuario:", userId);
+
+          db.collection("ubicate")
+            .doc("usuarios")
+            .collection("favoritos")
+            .doc(userId)
+            .get()
+            .then((doc) => {
+              if (
+                doc.exists &&
+                doc.data().negocios &&
+                doc.data().negocios.length > 0
+              ) {
+                const favoritos = doc.data().negocios;
+                console.log("Favoritos encontrados:", favoritos);
+                mostrarFavoritos(favoritos);
+              } else {
+                console.log("No hay favoritos o el documento no existe");
+                mostrarEstadoVacio();
+              }
+            })
+            .catch((error) => {
+              console.error("Error cargando favoritos:", error);
+              mostrarError(
+                "Error al cargar favoritos. Intenta recargar la página."
+              );
+            });
+        }
+      }
+
+      function mostrarFavoritos(favoritos) {
+        const favoritosList = document.getElementById("favoritos-list");
+
+        if (!favoritos || favoritos.length === 0) {
+          mostrarEstadoVacio();
+          return;
+        }
+
+        console.log("Mostrando", favoritos.length, "favoritos");
+
+        // Obtener detalles de cada negocio favorito
+        const promises = favoritos.map((businessId) => {
+          return db
+            .collection("ubicate")
+            .doc("negocios")
+            .collection("registros")
+            .doc(businessId)
+            .get()
+            .then((doc) => {
+              if (doc.exists) {
+                return { id: doc.id, ...doc.data() };
+              }
+              return null;
+            })
+            .catch((error) => {
+              console.error("Error cargando negocio:", businessId, error);
+              return null;
+            });
+        });
+
+        Promise.all(promises)
+          .then((negocios) => {
+            const negociosValidos = negocios.filter(
+              (negocio) => negocio !== null
+            );
+
+            if (negociosValidos.length === 0) {
+              mostrarEstadoVacio();
+              return;
+            }
+
+            favoritosList.innerHTML = negociosValidos
+              .map(
+                (negocio) => `
+                        <div class="business-card">
+                            <h5>${negocio.nombre || "Negocio sin nombre"}</h5>
+                            <p><i class="bi bi-tag"></i> ${
+                              negocio.categoria || "No especificado"
+                            }</p>
+                            <p><i class="bi bi-telephone"></i> ${
+                              negocio.telefono || "No especificado"
+                            }</p>
+                            <p><i class="bi bi-clock"></i> ${
+                              negocio.horario || "No especificado"
+                            }</p>
+                            ${
+                              negocio.descripcion
+                                ? `<p><i class="bi bi-info-circle"></i> ${negocio.descripcion}</p>`
+                                : ""
+                            }
+                            <div class="action-buttons">
+                                <button onclick="verEnMapa('${
+                                  negocio.id
+                                }')" class="btn-view-map">
+                                    <i class="bi bi-geo-alt"></i> Ver en Mapa
+                                </button>
+                                <button onclick="eliminarFavorito('${
+                                  negocio.id
+                                }')" class="btn-remove">
+                                    <i class="bi bi-trash"></i> Eliminar
+                                </button>
+                            </div>
+                        </div>
+                    `
+              )
+              .join("");
+          })
+          .catch((error) => {
+            console.error("Error cargando detalles de negocios:", error);
+            mostrarError("Error al cargar los detalles de los negocios");
+          });
+      }
+
+      function mostrarEstadoVacio() {
+        const favoritosList = document.getElementById("favoritos-list");
+        favoritosList.innerHTML = `
+                <div class="empty-state">
+                    <i class="bi bi-heart"></i>
+                    <h4>No tienes favoritos aún</h4>
+                    <p>Marca algunos negocios como favoritos en el mapa principal para verlos aquí.</p>
+                    <a href="principal.html" class="btn btn-primary mt-3">
+                        <i class="bi bi-map"></i> Explorar Negocios
+                    </a>
+                </div>
+            `;
+      }
+
+      function mostrarError(mensaje) {
+        const favoritosList = document.getElementById("favoritos-list");
+        favoritosList.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle"></i> ${mensaje}
+                </div>
+                <div class="text-center mt-3">
+                    <button onclick="cargarFavoritos()" class="btn btn-primary">
+                        <i class="bi bi-arrow-clockwise"></i> Reintentar
+                    </button>
+                </div>
+            `;
+      }
+
+      function verEnMapa(businessId) {
+        // Guardar el ID del negocio para mostrarlo en el mapa principal
+        localStorage.setItem("negocioParaMostrar", businessId);
+        window.location.href = "principal.html";
+      }
+
+      function eliminarFavorito(businessId) {
+        if (
+          !confirm(
+            "¿Estás seguro de que quieres eliminar este negocio de tus favoritos?"
+          )
+        ) {
+          return;
+        }
+
+        const userId = auth.currentUser.uid;
+
+        db.collection("ubicate")
+          .doc("usuarios")
+          .collection("favoritos")
+          .doc(userId)
+          .get()
+          .then((doc) => {
+            if (doc.exists) {
+              const favoritos = doc.data().negocios || [];
+              const nuevosFavoritos = favoritos.filter(
+                (id) => id !== businessId
+              );
+
+              return db
+                .collection("ubicate")
+                .doc("usuarios")
+                .collection("favoritos")
+                .doc(userId)
+                .set({
+                  negocios: nuevosFavoritos,
+                  ultimaActualizacion:
+                    firebase.firestore.FieldValue.serverTimestamp(),
+                });
+            } else {
+              return Promise.resolve();
+            }
+          })
+          .then(() => {
+            alert("✅ Negocio eliminado de favoritos");
+            cargarFavoritos(); // Recargar la lista
+          })
+          .catch((error) => {
+            console.error("Error eliminando favorito:", error);
+            alert("❌ Error al eliminar de favoritos");
+          });
+      }
+
+      // Cargar favoritos cuando la página esté lista
+      document.addEventListener("DOMContentLoaded", cargarFavoritos);
+    </script>
+  </body>
+</html>

@@ -248,6 +248,35 @@
         height: 20px;
         margin-right: 5px;
       }
+
+      /* Estilos para botones de favoritos */
+      .btn-favorito {
+        background: none;
+        border: none;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: transform 0.2s;
+        padding: 5px;
+      }
+
+      .btn-favorito:hover {
+        transform: scale(1.2);
+      }
+
+      .favorito-activo {
+        color: #dc3545;
+      }
+
+      .favorito-inactivo {
+        color: #6c757d;
+      }
+
+      .popup-favorito {
+        text-align: center;
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid #eee;
+      }
     </style>
   </head>
 
@@ -298,8 +327,12 @@
 
     <!-- Botones flotantes -->
     <div class="botones-flotantes">
-      <button class="boton-accion" id="btnFavoritos" title="Favoritos">
-        <i class="bi bi-star"></i>
+      <button
+        class="boton-accion"
+        onclick="irAFavoritos()"
+        title="Mis Favoritos"
+      >
+        <i class="bi bi-heart-fill"></i>
       </button>
     </div>
 
@@ -366,7 +399,7 @@
       // Iconos personalizados por categoría
       const categoryIcons = {
         restaurante: L.icon({
-          iconUrl: "restaurante.png",
+          iconUrl: "restauranre.png",
           iconSize: [32, 32],
           iconAnchor: [16, 32],
           popupAnchor: [0, -32],
@@ -492,24 +525,56 @@
             { icon: icon }
           ).addTo(map);
 
-          // Popup con información del negocio
-          marker.bindPopup(`
-            <div class="popup-title">${business.nombre || "Sin nombre"}</div>
-            <div class="popup-info"><i class="bi bi-tag"></i> ${
+          // Crear el contenido del popup de forma más segura
+          let popupContent = `
+            <div class="popup-title">${escapeHtml(
+              business.nombre || "Sin nombre"
+            )}</div>
+            <div class="popup-info"><i class="bi bi-tag"></i> ${escapeHtml(
               business.categoria || "No especificado"
-            }</div>
-            <div class="popup-info"><i class="bi bi-telephone"></i> ${
+            )}</div>
+            <div class="popup-info"><i class="bi bi-telephone"></i> ${escapeHtml(
               business.telefono || "No especificado"
-            }</div>
-            <div class="popup-info"><i class="bi bi-clock"></i> ${
+            )}</div>
+            <div class="popup-info"><i class="bi bi-clock"></i> ${escapeHtml(
               business.horario || "No especificado"
-            }</div>
-            ${
+            )}</div>
+        `;
+
+          if (business.descripcion) {
+            popupContent += `<div class="popup-info"><i class="bi bi-info-circle"></i> ${escapeHtml(
               business.descripcion
-                ? `<div class="popup-info"><i class="bi bi-info-circle"></i> ${business.descripcion}</div>`
-                : ""
+            )}</div>`;
+          }
+
+          popupContent += `
+            <div class="popup-favorito">
+                <button class="btn-favorito favorito-inactivo" id="btn-fav-${business.id}">
+                    <i class="bi bi-heart"></i>
+                </button>
+                <br>
+                <small>Agregar a favoritos</small>
+            </div>
+        `;
+
+          marker.bindPopup(popupContent);
+
+          // Agregar evento después de que el popup se abra
+          marker.on("popupopen", function () {
+            // Verificar estado de favorito
+            verificarEstadoFavorito(business.id);
+
+            // Agregar evento al botón
+            const botonFavorito = document.getElementById(
+              `btn-fav-${business.id}`
+            );
+            if (botonFavorito) {
+              botonFavorito.onclick = function (e) {
+                e.stopPropagation();
+                toggleFavorito(business.id);
+              };
             }
-          `);
+          });
 
           businessMarkers.push(marker);
         } catch (error) {
@@ -517,6 +582,13 @@
         }
       }
 
+      // Función auxiliar para escapar HTML y prevenir inyección
+      function escapeHtml(text) {
+        if (!text) return "";
+        const div = document.createElement("div");
+        div.textContent = text;
+        return div.innerHTML;
+      }
       // Función para actualizar la lista de negocios
       function updateBusinessList(businesses) {
         const businessList = document.getElementById("business-list");
@@ -551,6 +623,11 @@
             }')" class="btn btn-sm btn-outline-primary">
               <i class="bi bi-geo-alt"></i> Ver en mapa
             </button>
+            <button onclick="toggleFavorito('${
+              business.id
+            }')" class="btn btn-sm btn-outline-danger">
+              <i class="bi bi-heart"></i> Favorito
+            </button>
           `;
           businessList.appendChild(card);
         });
@@ -584,6 +661,109 @@
               mapElement.scrollIntoView({ behavior: "smooth", block: "start" });
             }
           });
+      }
+
+      // Funciones para manejar favoritos
+      function toggleFavorito(businessId) {
+        // Autenticación anónima si no hay usuario
+        if (!auth.currentUser) {
+          auth
+            .signInAnonymously()
+            .then(() => {
+              gestionarFavorito(businessId);
+            })
+            .catch((error) => {
+              console.error("Error en autenticación:", error);
+              alert("Error al guardar favorito");
+            });
+        } else {
+          gestionarFavorito(businessId);
+        }
+
+        function gestionarFavorito(businessId) {
+          const userId = auth.currentUser.uid;
+          const userFavRef = db
+            .collection("ubicate")
+            .doc("usuarios")
+            .collection("favoritos")
+            .doc(userId);
+
+          userFavRef
+            .get()
+            .then((doc) => {
+              const favoritos = doc.exists ? doc.data().negocios || [] : [];
+
+              if (favoritos.includes(businessId)) {
+                // Remover de favoritos
+                const nuevosFavoritos = favoritos.filter(
+                  (id) => id !== businessId
+                );
+                userFavRef.set({ negocios: nuevosFavoritos }).then(() => {
+                  actualizarBotonFavorito(businessId, false);
+                });
+              } else {
+                // Agregar a favoritos
+                favoritos.push(businessId);
+                userFavRef.set({ negocios: favoritos }).then(() => {
+                  actualizarBotonFavorito(businessId, true);
+                });
+              }
+            })
+            .catch((error) => {
+              console.error("Error gestionando favorito:", error);
+              alert("Error al guardar favorito");
+            });
+        }
+      }
+
+      function verificarEstadoFavorito(businessId) {
+        if (!auth.currentUser) return;
+
+        const userId = auth.currentUser.uid;
+        db.collection("ubicate")
+          .doc("usuarios")
+          .collection("favoritos")
+          .doc(userId)
+          .get()
+          .then((doc) => {
+            if (doc.exists) {
+              const favoritos = doc.data().negocios || [];
+              const esFavorito = favoritos.includes(businessId);
+              actualizarBotonFavorito(businessId, esFavorito);
+            }
+          });
+      }
+
+      function actualizarBotonFavorito(businessId, esFavorito) {
+        const boton = document.getElementById(`btn-fav-${businessId}`);
+        if (boton) {
+          if (esFavorito) {
+            boton.innerHTML = '<i class="bi bi-heart-fill"></i>';
+            boton.className = "btn-favorito favorito-activo";
+            boton.title = "Quitar de favoritos";
+            boton.nextElementSibling.innerHTML =
+              "<br><small>Quitar de favoritos</small>";
+          } else {
+            boton.innerHTML = '<i class="bi bi-heart"></i>';
+            boton.className = "btn-favorito favorito-inactivo";
+            boton.title = "Agregar a favoritos";
+            boton.nextElementSibling.innerHTML =
+              "<br><small>Agregar a favoritos</small>";
+          }
+        }
+      }
+
+      function irAFavoritos() {
+        window.location.href = "favoritos.html";
+      }
+
+      // Función para cargar un negocio específico al volver de favoritos
+      function cargarNegocioEspecifico() {
+        const negocioId = localStorage.getItem("negocioParaMostrar");
+        if (negocioId) {
+          focusBusiness(negocioId);
+          localStorage.removeItem("negocioParaMostrar");
+        }
       }
 
       // Escuchar nuevos negocios en tiempo real
@@ -720,6 +900,9 @@
             alert("Error al cerrar sesión. Intenta de nuevo.");
           });
       }
+
+      // Cargar negocio específico al volver de favoritos
+      document.addEventListener("DOMContentLoaded", cargarNegocioEspecifico);
     </script>
   </body>
 </html>
