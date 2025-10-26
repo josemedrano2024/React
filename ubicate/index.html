@@ -99,9 +99,9 @@
             await signInWithEmailAndPassword(auth, email, password);
             window.location.href = "principal.html";
           } catch (error) {
-            if (error.code === "") {
+            if (error.code === "auth/user-not-found") {
               alert("Por favor registrate.");
-            } else if (error.code === "") {
+            } else if (error.code === "auth/wrong-password") {
               alert("Contraseña incorrecta.");
             } else {
               alert("Error al iniciar sesión: " + error.message);
