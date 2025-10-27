@@ -7,10 +7,30 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+dist/
+dist-ssr/
+build/
+*.tsbuildinfo
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Firebase
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
+.firebase-debug*
+.firebaserc
 
 # Editor directories and files
 .vscode/*
@@ -23,7 +43,65 @@ dist-ssr
 *.sln
 *.sw?
 
-# Firebase
-.firebase/
-firebase-debug.log
-firebase-debug.*.log
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Cache directories
+.npm
+.eslintcache
+.yarn/cache
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# CSS coverage files
+*.css.map
+
+# Parcel bundler
+.parcel-cache/
+.cache/
+.parcel-cache
+
+# Next.js
+.next/
+
+# Nuxt.js
+.nuxt/
+
+# Quasar
+.quasar/
+
+# Vuepress
+.vuepress/dist
+
+# Serverless
+.serverless/
+
+# FuseBox
+.fusebox/
+
+# DynamoDB Local
+.dynamodb/
+
+# TernJS
+.tern-port
+
+# Stores API keys
+firebase-config.js
+config.js
+api-keys.js
