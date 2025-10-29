@@ -15,7 +15,7 @@
     <style>
       body {
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #f8f9fa;
+        background-color: #0b4bb0;
         margin: 0;
         padding: 0;
       }
@@ -23,13 +23,13 @@
       .navbar-custom {
         background-color: #4285f4;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        padding: 10px 0;
       }
 
       .navbar-title {
         color: white;
         font-weight: 600;
         font-size: 1.2rem;
+        flex-grow: 1;
         text-align: center;
       }
 
@@ -37,9 +37,34 @@
         height: 40px;
       }
 
+      .btn-volver-container {
+        padding: 15px 20px;
+      }
+
+      .btn-volver {
+        background: #4285f4;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+      }
+
+      .btn-volver:hover {
+        background: #3367d6;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+
       .favoritos-container {
         max-width: 800px;
-        margin: 30px auto;
+        margin: 20px auto;
         background: white;
         padding: 30px;
         border-radius: 15px;
@@ -85,6 +110,12 @@
         border-radius: 5px;
         cursor: pointer;
         margin-left: 10px;
+        transition: all 0.3s ease;
+      }
+
+      .btn-remove:hover {
+        background: #c82333;
+        transform: translateY(-1px);
       }
 
       .btn-view-map {
@@ -94,47 +125,128 @@
         padding: 8px 15px;
         border-radius: 5px;
         cursor: pointer;
+        transition: all 0.3s ease;
       }
 
-      .btn-volver {
-        background: white;
-        color: #4285f4;
-        border: 1px solid #4285f4;
-        padding: 8px 15px;
-        border-radius: 5px;
-        text-decoration: none;
-        display: inline-block;
-      }
-
-      .btn-volver:hover {
-        background: #4285f4;
-        color: white;
+      .btn-view-map:hover {
+        background: #3367d6;
+        transform: translateY(-1px);
       }
 
       .action-buttons {
         margin-top: 15px;
       }
+
+      footer {
+        text-align: center;
+        padding: 20px 0;
+        margin-top: 30px;
+        color: #ffffff;
+        background: rgba(0, 0, 0, 0.1);
+      }
+
+      .dropdown {
+        position: relative;
+      }
+
+      .btn-with-img {
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+      }
+
+      .btn-img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+      }
+
+      .dropdown-content {
+        display: none;
+        position: absolute;
+        top: 50px;
+        right: 0;
+        background-color: #fff;
+        width: 150px;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+      }
+
+      .dropdown-content a {
+        display: block;
+        padding: 12px 15px;
+        text-decoration: none;
+        font-size: 14px;
+        color: #333;
+        text-align: center;
+        transition: background-color 0.3s;
+      }
+
+      .dropdown-content a:hover {
+        background-color: #f8f9fa;
+        color: #4285f4;
+      }
+
+      .show {
+        display: block;
+      }
+
+      .spinner-border {
+        width: 1rem;
+        height: 1rem;
+      }
+
+      .business-info {
+        margin-bottom: 10px;
+      }
+
+      .business-info i {
+        width: 20px;
+        color: #4285f4;
+      }
     </style>
   </head>
+
   <body>
-    <!-- Navbar -->
+    <!-- Navbar (igual que principal.html) -->
     <nav class="navbar navbar-expand-lg navbar-light navbar-custom">
       <div class="container-fluid">
         <a class="navbar-brand" href="principal.html">
           <img src="src/assets/Logo.jpeg" alt="Logo" class="logo-img" />
         </a>
         <div class="navbar-title">Mis Favoritos</div>
-        <a href="principal.html" class="btn-volver">
-          <i class="bi bi-arrow-left"></i> Volver al Mapa
-        </a>
+
+        <div class="dropdown">
+          <button
+            class="btn-with-img dropdown-toggle"
+            onclick="toggleDropdown()"
+          >
+            <img src="src/assets/usuario.png" alt="Usuario" class="btn-img" />
+          </button>
+          <div class="dropdown-content" id="myDropdown">
+            <a href="usuario.html"> Perfil</a>
+            <a href="#" onclick="cerrarSesion()"> Cerrar Sesión</a>
+            <a href="guia.html"> Ayuda</a>
+          </div>
+        </div>
       </div>
     </nav>
 
+    <!-- Botón Volver -->
+    <div class="btn-volver-container">
+      <a href="principal.html" class="btn-volver">
+        <i class="bi bi-arrow-left"></i> Volver al Mapa Principal
+      </a>
+    </div>
+
+    <!-- Contenido Principal -->
     <div class="favoritos-container">
-      <h2>
+      <h2 class="mb-4">
         <i class="bi bi-heart-fill text-danger"></i> Mis Negocios Favoritos
       </h2>
-      <p class="text-muted">
+      <p class="text-muted mb-4">
         Aquí encontrarás todos los negocios que has marcado como favoritos.
       </p>
 
@@ -143,10 +255,16 @@
           <div class="spinner-border text-primary" role="status">
             <span class="visually-hidden">Cargando...</span>
           </div>
-          <p>Cargando favoritos...</p>
+          <p class="mt-2">Cargando favoritos...</p>
         </div>
       </div>
     </div>
+
+    <footer>
+      <div class="container">
+        <p>&copy; 2023 Ubicate - Todos los derechos reservados</p>
+      </div>
+    </footer>
 
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
@@ -169,6 +287,40 @@
       const db = firebase.firestore();
       const auth = firebase.auth();
 
+      // Funciones de la navbar
+      function toggleDropdown() {
+        document.getElementById("myDropdown").classList.toggle("show");
+      }
+
+      // Cierra el menú si el usuario hace clic fuera de él
+      window.onclick = function (event) {
+        if (
+          !event.target.matches(".dropdown-toggle") &&
+          !event.target.matches(".btn-img")
+        ) {
+          var dropdowns = document.getElementsByClassName("dropdown-content");
+          for (var i = 0; i < dropdowns.length; i++) {
+            var openDropdown = dropdowns[i];
+            if (openDropdown.classList.contains("show")) {
+              openDropdown.classList.remove("show");
+            }
+          }
+        }
+      };
+
+      function cerrarSesion() {
+        firebase
+          .auth()
+          .signOut()
+          .then(() => {
+            window.location.href = "index.html";
+          })
+          .catch((error) => {
+            console.error("Error al cerrar sesión:", error);
+            alert("Error al cerrar sesión. Intenta de nuevo.");
+          });
+      }
+
       // Cargar favoritos
       function cargarFavoritos() {
         const favoritosList = document.getElementById("favoritos-list");
@@ -186,7 +338,9 @@
               })
               .catch((error) => {
                 console.error("Error en autenticación:", error);
-                mostrarError("Error al cargar favoritos");
+                mostrarError(
+                  "Error al cargar favoritos. Verifica tu conexión."
+                );
               });
           }
         });
@@ -209,7 +363,7 @@
                 console.log("Favoritos encontrados:", favoritos);
                 mostrarFavoritos(favoritos);
               } else {
-                console.log("No hay favoritos o el documento no existe");
+                console.log("No hay favoritos");
                 mostrarEstadoVacio();
               }
             })
@@ -266,36 +420,40 @@
             favoritosList.innerHTML = negociosValidos
               .map(
                 (negocio) => `
-                        <div class="business-card">
-                            <h5>${negocio.nombre || "Negocio sin nombre"}</h5>
-                            <p><i class="bi bi-tag"></i> ${
-                              negocio.categoria || "No especificado"
-                            }</p>
-                            <p><i class="bi bi-telephone"></i> ${
-                              negocio.telefono || "No especificado"
-                            }</p>
-                            <p><i class="bi bi-clock"></i> ${
-                              negocio.horario || "No especificado"
-                            }</p>
-                            ${
-                              negocio.descripcion
-                                ? `<p><i class="bi bi-info-circle"></i> ${negocio.descripcion}</p>`
-                                : ""
-                            }
-                            <div class="action-buttons">
-                                <button onclick="verEnMapa('${
-                                  negocio.id
-                                }')" class="btn-view-map">
-                                    <i class="bi bi-geo-alt"></i> Ver en Mapa
-                                </button>
-                                <button onclick="eliminarFavorito('${
-                                  negocio.id
-                                }')" class="btn-remove">
-                                    <i class="bi bi-trash"></i> Eliminar
-                                </button>
-                            </div>
-                        </div>
-                    `
+                  <div class="business-card">
+                    <h5>${negocio.nombre || "Negocio sin nombre"}</h5>
+                    
+                    <div class="business-info">
+                      <p><i class="bi bi-tag"></i> <strong>Categoría:</strong> ${
+                        negocio.categoria || "No especificado"
+                      }</p>
+                      <p><i class="bi bi-telephone"></i> <strong>Teléfono:</strong> ${
+                        negocio.telefono || "No especificado"
+                      }</p>
+                      <p><i class="bi bi-clock"></i> <strong>Horario:</strong> ${
+                        negocio.horario || "No especificado"
+                      }</p>
+                      ${
+                        negocio.descripcion
+                          ? `<p><i class="bi bi-info-circle"></i> <strong>Descripción:</strong> ${negocio.descripcion}</p>`
+                          : ""
+                      }
+                    </div>
+
+                    <div class="action-buttons">
+                      <button onclick="verEnMapa('${
+                        negocio.id
+                      }')" class="btn-view-map">
+                        <i class="bi bi-geo-alt"></i> Ver en Mapa
+                      </button>
+                      <button onclick="eliminarFavorito('${
+                        negocio.id
+                      }')" class="btn-remove">
+                        <i class="bi bi-trash"></i> Eliminar
+                      </button>
+                    </div>
+                  </div>
+                `
               )
               .join("");
           })
@@ -308,29 +466,29 @@
       function mostrarEstadoVacio() {
         const favoritosList = document.getElementById("favoritos-list");
         favoritosList.innerHTML = `
-                <div class="empty-state">
-                    <i class="bi bi-heart"></i>
-                    <h4>No tienes favoritos aún</h4>
-                    <p>Marca algunos negocios como favoritos en el mapa principal para verlos aquí.</p>
-                    <a href="principal.html" class="btn btn-primary mt-3">
-                        <i class="bi bi-map"></i> Explorar Negocios
-                    </a>
-                </div>
-            `;
+          <div class="empty-state">
+            <i class="bi bi-heart"></i>
+            <h4>No tienes favoritos aún</h4>
+            <p>Marca algunos negocios como favoritos en el mapa principal para verlos aquí.</p>
+            <a href="principal.html" class="btn btn-primary mt-3">
+              <i class="bi bi-map"></i> Explorar Negocios
+            </a>
+          </div>
+        `;
       }
 
       function mostrarError(mensaje) {
         const favoritosList = document.getElementById("favoritos-list");
         favoritosList.innerHTML = `
-                <div class="alert alert-danger">
-                    <i class="bi bi-exclamation-triangle"></i> ${mensaje}
-                </div>
-                <div class="text-center mt-3">
-                    <button onclick="cargarFavoritos()" class="btn btn-primary">
-                        <i class="bi bi-arrow-clockwise"></i> Reintentar
-                    </button>
-                </div>
-            `;
+          <div class="alert alert-danger">
+            <i class="bi bi-exclamation-triangle"></i> ${mensaje}
+          </div>
+          <div class="text-center mt-3">
+            <button onclick="cargarFavoritos()" class="btn btn-primary">
+              <i class="bi bi-arrow-clockwise"></i> Reintentar
+            </button>
+          </div>
+        `;
       }
 
       function verEnMapa(businessId) {
